@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/clientHomeFragment">
+    <fragment
+        android:id="@+id/clientHomeFragment"
+        android:name="com.example.vehicleserviceapp.ClientHomeFragment"
+        tools:layout="@layout/fragment_client_home" >
+        <action
+            android:id="@+id/action_clientHomeFragment_to_bookingFragment"
+            app:destination="@id/bookingFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/clientBookingFragment"
+        android:name="com.example.vehicleserviceapp.ClientBookingFragment"
+        tools:layout="@layout/fragment_client_booking" />
+    <fragment
+        android:id="@+id/vehicleFragment"
+        android:name="com.example.vehicleserviceapp.VehicleFragment"
+        tools:layout="@layout/fragment_vehicle_list" />
+    <fragment
+        android:id="@+id/bookingFragment"
+        android:name="com.example.vehicleserviceapp.BookingFragment"
+        android:label="fragment_booking"
+        tools:layout="@layout/fragment_booking" >
+        <argument
+            android:name="argmnts"
+            app:nullable="true"
+            app:argType="android.os.Bundle"
+            android:defaultValue="@null"/>
+    </fragment>
+</navigation>

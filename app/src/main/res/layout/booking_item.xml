@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="20dp"
+    app:cardElevation="10dp"
+    android:layout_height="100dp">
+    <LinearLayout
+        android:padding="8dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/booking_service_station"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Taha's Service Station"/>
+        <TextView
+            android:layout_marginLeft="5dp"
+            android:id="@+id/client_booking_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Time: 12:03"
+            />
+        <TextView
+            android:layout_marginLeft="5dp"
+            android:id="@+id/client_booking_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date: 19/3/2021"/>
+        <TextView
+            android:layout_marginLeft="5dp"
+            android:id="@+id/client_booking_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status: Pending"/>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
