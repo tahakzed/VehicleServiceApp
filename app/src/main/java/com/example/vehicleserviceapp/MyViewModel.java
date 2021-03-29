@@ -23,7 +23,7 @@ import static android.content.ContentValues.TAG;
 public class MyViewModel extends AndroidViewModel {
     private FirebaseFirestore db;
     private MutableLiveData<List<Admin>> adminList;
-    private MutableLiveData<List<Client>> clientMutableLiveData;
+    private MutableLiveData<Client> clientMutableLiveData;
     private MutableLiveData<List<Booking>> clientBookings;
     private List<Booking> bookings;
 
@@ -56,9 +56,10 @@ public class MyViewModel extends AndroidViewModel {
                             double lat=Double.parseDouble(data.get("Lat").toString());
                             double lng=Double.parseDouble(data.get("Lng").toString());
                             List<String> reviews=(List<String>) data.get("Reviews");
-                            long charges=(Long)data.getData().get("Charges");
+                            long chargesCar=(Long)data.getData().get("Charges Car");
+                            long chargesBike=(Long)data.get("Charges Bike");
                             List<String> Bookings=(List<String>) data.get("Bookings");
-                            admins.add(new Admin(name,email,phone,lat,lng,serviceStation,reviews,(int)charges,Bookings));
+                            admins.add(new Admin(name,email,phone,lat,lng,serviceStation,reviews,chargesCar,chargesBike,Bookings));
                         }
                         adminList.postValue(admins);
                     }
@@ -71,7 +72,7 @@ public class MyViewModel extends AndroidViewModel {
 
         return adminList;
     }
-   public LiveData<List<Client>> getClientDataWithEmail(String email){
+   public LiveData<Client> getClientDataWithEmail(String email){
         if(clientMutableLiveData.getValue()==null){
         db.document("Client/"+email).addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
@@ -81,8 +82,7 @@ public class MyViewModel extends AndroidViewModel {
                     return;
                 }
                 if(value!=null){
-                    Log.d(TAG,"CLIENT DATA:"+value.getData());
-                    List<Client> clientList=new ArrayList<>();
+
                     String name=value.get("Name").toString();
                     String email=value.get("Email").toString();
                     String phone=value.get("Phone").toString();
@@ -90,8 +90,8 @@ public class MyViewModel extends AndroidViewModel {
                     double lng=Double.parseDouble(value.get("Lng").toString());
                     List<String> vehicles=(List<String>) value.get("Vehicles");
                     List<String> Bookings=(List<String>)value.get("Bookings");
-                    clientList.add(new Client(name,email,phone,lat,lng,vehicles,Bookings));
-                    clientMutableLiveData.postValue(clientList);
+                    Client client=new Client(name,email,phone,lat,lng,vehicles,Bookings);
+                    clientMutableLiveData.postValue(client);
                 }
                 else{
                     Log.e(TAG, "onEvent: Value is NUll");
@@ -103,20 +103,20 @@ public class MyViewModel extends AndroidViewModel {
         return clientMutableLiveData;
     }
     public LiveData<List<Booking>> getBookingsDataWithIds(List<String> bookingIds){
-        if(clientBookings.getValue()==null && bookingIds.size()>0){
+        if(bookingIds.size()>0){
 
            db.collection("Bookings").whereIn("Booking-ID",bookingIds).addSnapshotListener(new EventListener<QuerySnapshot>() {
                @Override
                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                    if(error!=null){
-                       Log.e("BOOKINGS ERROR: ",error.getMessage());
+                       Log.d("BOOKINGS ERROR: ",error.getMessage());
                    }
                    if(value!=null){
                        List<DocumentSnapshot> docs=value.getDocuments();
                        bookings=new ArrayList<>();
+                       Log.d("MyViewModel", "onEvent: doc.size()"+docs.size());
                        for(DocumentSnapshot doc : docs){
-                           if(!doc.exists())
-                               continue;
+                           Log.d("ViewModel", "onEvent: Vehicle Name: "+ doc.get("Vehicle Name"));
                            bookings.add(new Booking(doc.getId(),
                                    doc.get("Status").toString(),
                                    doc.get("Service Station").toString(),
@@ -139,7 +139,7 @@ public class MyViewModel extends AndroidViewModel {
                        clientBookings.postValue(bookings);
                    }
                    else{
-                       Log.e("BOOKINGS ERROR:","value is null");
+                       Log.d("BOOKINGS ERROR:","value is null");
                    }
                }
            });

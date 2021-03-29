@@ -12,40 +12,40 @@
         android:layout_height="wrap_content"
         >
         <TextView
-            android:id="@+id/booking_service_station"
+            android:id="@+id/admin_booking_client_name"
             android:textStyle="bold"
             android:textSize="18sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Taha's Service Station"/>
+            android:text="Taha Khanzada"/>
         <TextView
             android:layout_marginLeft="5dp"
-            android:id="@+id/client_booking_time"
+            android:id="@+id/admin_booking_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Time: 12:03"
             />
         <TextView
             android:layout_marginLeft="5dp"
-            android:id="@+id/client_booking_date"
+            android:id="@+id/admin_booking_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Date: 19/3/2021"/>
         <TextView
             android:layout_marginLeft="5dp"
-            android:id="@+id/client_vehicle_name"
+            android:id="@+id/admin_vehicle_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Vehicle Name: Mehran"/>
         <TextView
             android:layout_marginLeft="5dp"
-            android:id="@+id/client_vehicle_type"
+            android:id="@+id/admin_vehicle_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Vehicler Type: Car"/>
+            android:text="Vehicle Type: car"/>
         <TextView
             android:layout_marginLeft="5dp"
-            android:id="@+id/client_booking_status"
+            android:id="@+id/admin_booking_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Status: Pending"/>

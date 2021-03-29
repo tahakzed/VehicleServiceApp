@@ -8,7 +8,10 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.ActivityNavigator;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
+import androidx.navigation.NavHostController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -31,9 +34,11 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class ClientMainActivity extends AppCompatActivity{
+public class ClientMainActivity extends AppCompatActivity implements View.OnClickListener {
     MaterialToolbar topAppBar;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -65,10 +70,10 @@ public class ClientMainActivity extends AppCompatActivity{
     protected void onResume() {
         super.onResume();
         myViewModel=new ViewModelProvider(this).get(MyViewModel.class);
-        myViewModel.getClientDataWithEmail(email).observe(this, new Observer<List<Client>>() {
+        myViewModel.getClientDataWithEmail(email).observe(this, new Observer<Client>() {
             @Override
-            public void onChanged(List<Client> clients) {
-                Client client=clients.get(0);
+            public void onChanged(Client c) {
+                Client client=c;
                 name=client.getName();
                 email=client.getEmail();
                 populateNavHeader(navHeader);
@@ -78,10 +83,23 @@ public class ClientMainActivity extends AppCompatActivity{
                     public void onChanged(List<Booking> bs){
                         if(bookings.size()<=bs.size()){
                         for(int i=0;i<bookings.size();i++){
-
                             if(!bookings.get(i).getStatus().equals(bs.get(i).getStatus()))
                                 notifyOnBookingChanged(bs.get(i));
+
                         }}
+                        for(Booking b: bs){
+                            if(b.getStatus().equals("Declined"))
+                            {
+                                FirebaseFirestore db=FirebaseFirestore.getInstance();
+                                db.collection("Bookings").document(b.getBookingID())
+                                        .delete();
+                                Map<String,Object> cMap=new HashMap<>();
+                                bookingIDs.remove(b.getBookingID());
+                                cMap.put("Bookings",bookingIDs);
+                                db.collection("Client").document(email)
+                                        .update(cMap);
+                            }
+                        }
                         bookings=bs;
                     }
                 });
@@ -116,6 +134,8 @@ public class ClientMainActivity extends AppCompatActivity{
         navController=navHost.getNavController();
         NavigationUI.setupActionBarWithNavController(this,navController,drawerLayout);
         NavigationUI.setupWithNavController(navigationView,navController);
+        navigationView.getHeaderView(0);
+        navHeader.setOnClickListener(this);
     }
 
     private void createNotificationChannel() {
@@ -154,8 +174,6 @@ public class ClientMainActivity extends AppCompatActivity{
 // notificationId is a unique int for each notification that you must define
         notificationManager.notify(1, builder.build());
 
-
-
     }
 
     private void populateNavHeader(View view){
@@ -166,43 +184,12 @@ public class ClientMainActivity extends AppCompatActivity{
 
     }
 
-    /*@Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int id=item.getItemId();
-        switch (id){
-            case R.id.vehicle_list:
-                item.setChecked(true);
-                drawerLayout.closeDrawer(GravityCompat.START);
-                VehicleFragment vehicleFragment=new VehicleFragment();
-                vehicleFragment.setArguments(bundle);
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.placeholder,vehicleFragment)
-                        .commit();
+    @Override
+    public void onClick(View v) {
+        drawerLayout.closeDrawer(GravityCompat.START);
+        Bundle client_data=new Bundle();
+        client_data.putString("client email",email);
+        navController.navigate(R.id.clientProfileFragment2,ClientProfileFragmentArgs.fromBundle(client_data).getClientData());
+    }
 
-                return true;
-            case R.id.home:
-                item.setChecked(true);
-                drawerLayout.closeDrawer(GravityCompat.START);
-                ClientHomeFragment clientHomeFragment=new ClientHomeFragment();
-                clientHomeFragment.setArguments(bundle);
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.placeholder,clientHomeFragment)
-                        .commit();
-
-                return true;
-            case R.id.booking_list:
-                item.setChecked(true);
-                drawerLayout.closeDrawer(GravityCompat.START);
-                ClientBookingFragment clientBookingFragment=new ClientBookingFragment();
-                clientBookingFragment.setArguments(bundle);
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.placeholder,clientBookingFragment)
-                        .commit();
-                return true;
-        }
-        return false;
-    }*/
 }

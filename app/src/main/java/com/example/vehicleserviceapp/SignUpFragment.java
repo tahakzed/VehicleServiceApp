@@ -46,9 +46,9 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private String fullName,email,phone,password,userTypeStr,vehicleTypeStr,vehicleName,serviceStation;
-    int charges;
+    int chargesCar,chargesBike;
     private double lat,lng;
-    private TextInputEditText nameET,emailET,phoneET,passET,vnameET,serviceStnET,chargesET;
+    private TextInputEditText nameET,emailET,phoneET,passET,vnameET,serviceStnET,chargesCarET,chargesBikeET;
     private Button signUpBtn,signInBtn,continueBtn1,continueBtn2;
     private static final int MAPS_ACTIVITY_REQUEST_CODE=101;
     @Override
@@ -76,7 +76,8 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
         passET=view.findViewById(R.id.password_signup_input);
         vnameET=view.findViewById(R.id.vname_input);
         serviceStnET=view.findViewById(R.id.service_station_input);
-        chargesET=view.findViewById(R.id.charges_input);
+        chargesCarET=view.findViewById(R.id.car_charges_input);
+        chargesBikeET=view.findViewById(R.id.bike_charges_input);
         db= FirebaseFirestore.getInstance();
         auth=FirebaseAuth.getInstance();
 
@@ -122,7 +123,8 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
                 break;
             case R.id.continue2_btn:
                 serviceStation=serviceStnET.getText().toString();
-                charges=Integer.parseInt(chargesET.getText().toString());
+                chargesCar=Integer.parseInt(chargesCarET.getText().toString());
+                chargesBike=Integer.parseInt(chargesBikeET.getText().toString());
                 Intent intent1=new Intent(getContext(),MapsActivity.class);
                 startActivityForResult(intent1,MAPS_ACTIVITY_REQUEST_CODE);
                 break;
@@ -146,7 +148,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
             if(userTypeStr.equals("Admin")){
                 List<String> admin_reviews=new ArrayList<>();
                 admin_reviews.add(" ;NaN; ");
-                Admin admin=new Admin(fullName,email,phone,lat,lng,serviceStation,admin_reviews,charges,new ArrayList<String>());
+                Admin admin=new Admin(fullName,email,phone,lat,lng,serviceStation,admin_reviews,chargesCar,chargesBike,new ArrayList<String>());
                 dbData.put("Name",admin.getName());
                 dbData.put("Email",admin.getEmail());
                 dbData.put("Phone",admin.getPhone());
@@ -176,7 +178,8 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
                                     }
                                 });//END: add to firestore
                                 dbData.put("Service Station",admin.getServiceStationName());
-                                dbData.put("Charges",charges);
+                                dbData.put("Charges Car",chargesCar);
+                                dbData.put("Charges Bike",chargesBike);
                                 dbData.put("Bookings",new ArrayList<String>());
                                 db.document("Admin/"+admin.getEmail()).set(dbData).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
@@ -285,18 +288,6 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
                         }
                     }
                 });
-                Fragment mainFragment=new MainFragment();
-                Bundle bundle=new Bundle();
-                bundle.putString("Name",client.getName());
-                bundle.putString("Email",client.getEmail());
-                bundle.putString("Phone",client.getPhone());
-                bundle.putString("User Type",userTypeStr);
-                bundle.putString("Location",lat+";"+lng);
-                mainFragment.setArguments(bundle);
-                getActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment,mainFragment)
-                        .commit();
             }
         }
     }

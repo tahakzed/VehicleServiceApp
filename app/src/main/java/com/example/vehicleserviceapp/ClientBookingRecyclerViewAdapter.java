@@ -1,5 +1,6 @@
 package com.example.vehicleserviceapp;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +38,10 @@ public class ClientBookingRecyclerViewAdapter extends RecyclerView.Adapter<Clien
             holder.getServiceStationNameTv().setText(booking.getServiceStationName());
             holder.getTimeTv().setText("Time: "+booking.getTime());
             holder.getDateTv().setText("Date: "+booking.getDate());
+            holder.getVehicleNameTv().setText("Vehicle name: "+booking.getVehicleName());
+            holder.getVehicleTypeTv().setText("Vehicle type: "+booking.getVehicleType());
             holder.getStatusTv().setText("Status: "+booking.getStatus());
+            Log.d("BOOKING ADAPTEr", "onBindViewHolder: "+booking.getVehicleName());
         }
     }
 
@@ -49,7 +53,7 @@ public class ClientBookingRecyclerViewAdapter extends RecyclerView.Adapter<Clien
     }
 
     public void setBookings(List<Booking> bookings) {
-        this.bookings = bookings;
+        this.bookings=bookings;
         notifyDataSetChanged();
     }
 
@@ -58,6 +62,8 @@ public class ClientBookingRecyclerViewAdapter extends RecyclerView.Adapter<Clien
         private TextView timeTv;
         private TextView dateTv;
         private TextView statusTv;
+        private TextView vehicleNameTv;
+        private TextView vehicleTypeTv;
         private OnNoteListener onNoteListener;
         public ViewHolder(View view, OnNoteListener onNoteListener) {
             super(view);
@@ -65,6 +71,8 @@ public class ClientBookingRecyclerViewAdapter extends RecyclerView.Adapter<Clien
             this.timeTv=view.findViewById(R.id.client_booking_time);
             this.dateTv=view.findViewById(R.id.client_booking_date);
             this.statusTv=view.findViewById(R.id.client_booking_status);
+            this.vehicleNameTv=view.findViewById(R.id.client_vehicle_name);
+            this.vehicleTypeTv=view.findViewById(R.id.client_vehicle_type);
             this.onNoteListener=onNoteListener;
             itemView.setOnLongClickListener(this);
         }
@@ -85,6 +93,13 @@ public class ClientBookingRecyclerViewAdapter extends RecyclerView.Adapter<Clien
             return timeTv;
         }
 
+        public TextView getVehicleNameTv() {
+            return vehicleNameTv;
+        }
+
+        public TextView getVehicleTypeTv() {
+            return vehicleTypeTv;
+        }
 
         @Override
         public boolean onLongClick(View v) {

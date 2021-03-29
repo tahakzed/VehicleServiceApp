@@ -47,7 +47,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
         int id=v.getId();
         switch (id){
             case R.id.sign_up_btn:
-                Fragment signupFragment=new SignUpFragment();
+                SignUpFragment signupFragment=new SignUpFragment();
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment,signupFragment)

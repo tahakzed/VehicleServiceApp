@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -18,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,43 +48,39 @@ public class ClientBookingFragment extends Fragment implements OnNoteListener{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view=inflater.inflate(R.layout.fragment_client_booking, container, false);
-        init();
+
 
         return view;
     }
     private void init(){
        // clientEmail=getArguments().getString("client email");
         clientEmail="tahakzed@gmail.com";
-        bookingIDs=new ArrayList<>();
-        bookings=new ArrayList<>();
         bookingRecyclerView=view.findViewById(R.id.client_booking_list);
         adapter=new ClientBookingRecyclerViewAdapter(bookings,this);
+        bookingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        bookingRecyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        init();
         myViewModel=new ViewModelProvider(getActivity()).get(MyViewModel.class);
-        myViewModel.getClientDataWithEmail(clientEmail).observe(getViewLifecycleOwner(), new Observer<List<Client>>() {
+        myViewModel.getClientDataWithEmail(clientEmail).observe(getViewLifecycleOwner(), new Observer<Client>() {
             @Override
-            public void onChanged(List<Client> clients) {
-                Client client=clients.get(0);
+            public void onChanged(Client c) {
+                Client client=c;
                 bookingIDs=client.getBookings();
+                Log.d("Client booking Ids", "onChanged: "+bookingIDs);
                 myViewModel.getBookingsDataWithIds(bookingIDs).observe(getViewLifecycleOwner(), new Observer<List<Booking>>() {
                     @Override
                     public void onChanged(List<Booking> bs){
                         bookings=bs;
+                        Log.d("Booking onchanged", "onChanged: bs="+bs.toString());
                         adapter.setBookings(bookings);
                     }
                 });
             }
         });
-
-        bookingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        bookingRecyclerView.setAdapter(adapter);
-    }
-
-
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
     @Override
@@ -104,25 +103,12 @@ public class ClientBookingFragment extends Fragment implements OnNoteListener{
                                 .update(tempMap).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                Toast.makeText(getContext(),"Booking canceled!",Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getContext(),"Booking canceled!",Toast.LENGTH_SHORT).show();
                             }
                         });
-                        db.collection("Bookings").document(removeId)
-                                .delete();
-                        String adminEmail=b.getAdminEmail();
-                        db.collection("Admin").document(adminEmail)
-                                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                            @Override
-                            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                List<String> adminBookingId=(List<String>)documentSnapshot.get("Bookings");
-                                adminBookingId.remove(removeId);
-                                Map<String,Object> adminMap=new HashMap<>();
-                                adminMap.put("Bookings",adminBookingId);
-                                db.collection("Admin").document(adminEmail)
-                                        .update(adminMap);
-
-                            }
-                        });
+                        Map<String,Object> bMap=new HashMap<>();
+                        bMap.put("Status","Cancelled");
+                        db.collection("Bookings").document(removeId).update(bMap);
                         dialog.dismiss();
                     }
 

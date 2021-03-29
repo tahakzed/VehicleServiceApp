@@ -29,8 +29,20 @@
         tools:layout="@layout/fragment_booking" >
         <argument
             android:name="argmnts"
-            app:nullable="true"
-            app:argType="android.os.Bundle"
-            android:defaultValue="@null"/>
+            app:argType="android.os.Bundle" />
     </fragment>
+    <fragment
+        android:id="@+id/clientProfileFragment2"
+        android:name="com.example.vehicleserviceapp.ClientProfileFragment"
+        android:label="fragment_client_profile"
+        tools:layout="@layout/fragment_client_profile" >
+
+        <argument
+            app:nullable="true"
+            android:name="client_data"
+            app:argType="android.os.Bundle"
+            android:defaultValue="@null"
+            />
+    </fragment>
+
 </navigation>

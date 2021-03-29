@@ -65,10 +65,10 @@ public class VehicleFragment extends Fragment implements View.OnClickListener,On
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         clientEmail="tahakzed@gmail.com";
         myViewModel=new ViewModelProvider(getActivity()).get(MyViewModel.class);
-        myViewModel.getClientDataWithEmail(clientEmail).observe(getViewLifecycleOwner(), new Observer<List<Client>>() {
+        myViewModel.getClientDataWithEmail(clientEmail).observe(getViewLifecycleOwner(), new Observer<Client>() {
             @Override
-            public void onChanged(List<Client> clients) {
-                Client client=clients.get(0);
+            public void onChanged(Client c) {
+                Client client=c;
                 vList=client.getVehicleNameAndType();
                 vehicleAdapter.setVehicleList(vList);
                 Log.d(TAG,"VEHICLE LIST"+vList);

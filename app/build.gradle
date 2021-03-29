@@ -45,6 +45,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.libraries.places:places:2.4.0'
     implementation 'com.google.android.gms:play-services-location:18.0.0'
+    implementation 'com.google.firebase:firebase-messaging:21.0.1'
     def nav_version = "2.3.4"
     implementation "androidx.navigation:navigation-fragment:$nav_version"
     implementation "androidx.navigation:navigation-ui:$nav_version"

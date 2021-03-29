@@ -70,7 +70,9 @@ public class ClientHomeFragment extends Fragment implements OnNoteListener{
         String serviceStationName=current.getServiceStationName();
         double lat=current.getLat();
         double lng=current.getLng();
-        int charges=current.getCharges();
+        long chargesCar=current.getChargesCar();
+        long chargesBike=current.getChargesBike();
+        List<String> adminBookings=current.getBookings();
         Bundle bundle=new Bundle();
         bundle.putString("client email",clientEmail);
         bundle.putString("name",name);
@@ -79,16 +81,14 @@ public class ClientHomeFragment extends Fragment implements OnNoteListener{
         bundle.putString("service station",serviceStationName);
         bundle.putDouble("lat",lat);
         bundle.putDouble("lng",lng);
-        bundle.putInt("charges",charges);
+        bundle.putLong("chargesCar",chargesCar);
+        bundle.putLong("chargesBike",chargesBike);
+        bundle.putStringArrayList("adminBookings",(ArrayList<String>) adminBookings);
         bundle.putStringArrayList("reviews",(ArrayList<String>) current.getReviews());
         ClientHomeFragmentDirections.ActionClientHomeFragmentToBookingFragment action=
-                ClientHomeFragmentDirections.actionClientHomeFragmentToBookingFragment().setArgmnts(bundle);
+                ClientHomeFragmentDirections.actionClientHomeFragmentToBookingFragment(bundle).setArgmnts(bundle);
         Navigation.findNavController(view).navigate(action);
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        myViewModel.getAllAdmins().removeObservers(getViewLifecycleOwner());
-    }
+
 }

@@ -5,12 +5,13 @@ import java.util.List;
 public class Admin extends User{
     private String serviceStationName;
     private List<String> reviews,bookings;
-    private int charges;
-    Admin(String name, String email, String phone, double lat, double lng, String serviceStationName, List<String> reviews,int charges,List<String> bookings ){
+    private long chargesCar,chargesBike;
+    Admin(String name, String email, String phone, double lat, double lng, String serviceStationName, List<String> reviews,long chargesCar,long chargesBike,List<String> bookings ){
         super(name,email,phone,lat,lng);
         this.serviceStationName=serviceStationName;
         this.reviews=reviews;
-        this.charges=charges;
+        this.chargesCar=chargesCar;
+        this.chargesBike=chargesBike;
         this.bookings=bookings;
     }
 
@@ -22,8 +23,12 @@ public class Admin extends User{
         return reviews;
     }
 
-    public int getCharges() {
-        return charges;
+    public long getChargesBike() {
+        return chargesBike;
+    }
+
+    public long getChargesCar() {
+        return chargesCar;
     }
 
     public List<String> getBookings() {

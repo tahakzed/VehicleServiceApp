@@ -55,9 +55,9 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
     private TextView serviceStationTv,ratingBarTv,numOfReviewsTv;
     private RatingBar ratingBar;
     double lat,lng;
-    int charges;
+    long chargesCar,chargesBike;
     double clientLat,clientLng;
-    List<String> reviews_list;
+    List<String> reviews_list,adminBookings;
     String date,time;
     ReviewsRecyclerAdapter recyclerAdapter;
 
@@ -105,8 +105,9 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
         lat=args.getDouble("lat");
         lng=args.getDouble("lng");
         reviews_list=args.getStringArrayList("reviews");
-        charges=args.getInt("charges");
-
+        chargesCar=args.getLong("chargesCar");
+        chargesBike=args.getLong("chargesBike");
+        adminBookings=args.getStringArrayList("adminBookings");
     }
 
     private void setData(){
@@ -140,6 +141,7 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
 
     return (5*star5+4*star4+3*star3+2*star2+1*star1)/reviews_list.size();
     }
+
 
     @Override
     public void onClick(View v) {
@@ -221,17 +223,21 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
                             .setSingleChoiceItems(vnames, 0, null)
                             .setPositiveButton("SELECT", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    dialog.dismiss();
+
                                     vname=vnames[((AlertDialog)dialog).getListView().getCheckedItemPosition()];
                                     clientLat=(Double)doc.get("Lat");
                                     clientLng=(Double)doc.get("Lng");
+                                    String vehicleType=findVType(vv,vname);
                                     Map<String,Object> dbData=new HashMap<>();
                                     dbData.put("Lat",clientLat);
                                     dbData.put("Lng",clientLng);
                                     dbData.put("Admin Email",email);
                                     dbData.put("Client Name",doc.get("Name"));
                                     dbData.put("Payment Status","Unpaid");
-                                    dbData.put("Payment Charges",charges);
+                                    if(vehicleType.equals("Car"))
+                                         dbData.put("Payment Charges",chargesCar);
+                                    else if(vehicleType.equals("Bike"))
+                                        dbData.put("Payment Charges",chargesBike);
                                     dbData.put("Payment Date","NaN");
                                     dbData.put("Payment Time","NaN");
                                     dbData.put("Payment Tip",0);
@@ -239,7 +245,7 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
                                     dbData.put("Date",date);
                                     dbData.put("Time",time);
                                     dbData.put("Vehicle Name",vname);
-                                    dbData.put("Vehicle Type",findVType(vv,vname));
+                                    dbData.put("Vehicle Type",vehicleType);
                                     dbData.put("Client Phone",cphone);
                                     dbData.put("Client Email",clientEmail);
                                     dbData.put("Service Station",serviceStationName);
@@ -247,18 +253,28 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
                                     dbData.put("Booking-ID",bookingID);
                                     db.collection("Bookings").document(bookingID).set(dbData);
                                     Map<String,Object> adminMap=new HashMap<>();
-                                    List<String> b=new ArrayList<>();
-                                    b.add(bookingID);
-                                    adminMap.put("Bookings",b);
-                                    db.document("Admin/"+email).update(adminMap);
-                                    Map<String,Object> clientMap=new HashMap<>();
-                                    List<String> cb=new ArrayList<>();
-                                    cb.add(bookingID);
-                                    clientMap.put("Bookings",cb);
-                                    db.document("Client/"+clientEmail).update(clientMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    db.document("Admin/"+email).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
-                                        public void onSuccess(Void aVoid) {
-                                            Toast.makeText(getContext(),"BOOKED!",Toast.LENGTH_SHORT).show();
+                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                            List<String> b=(List<String>)documentSnapshot.get("Bookings");
+                                            if(b.size()==0)
+                                                b=new ArrayList<>();
+                                            b.add(bookingID);
+                                            adminMap.put("Bookings",b);
+                                            db.document("Admin/"+email).update(adminMap);
+                                            Map<String,Object> clientMap=new HashMap<>();
+                                            List<String> cb=(List<String>)doc.get("Bookings");
+                                            if(cb.size()==0)
+                                                cb=new ArrayList<>();
+                                            cb.add(bookingID);
+                                            clientMap.put("Bookings",cb);
+                                            db.document("Client/"+clientEmail).update(clientMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Toast.makeText(getContext(),"BOOKED!",Toast.LENGTH_SHORT).show();
+                                                    dialog.dismiss();
+                                                }
+                                            });
                                         }
                                     });
                                 }

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/admin_nav_graph"
+    app:startDestination="@id/adminHomeFragment">
+
+    <fragment
+        android:id="@+id/adminHomeFragment"
+        android:name="com.example.vehicleserviceapp.AdminHomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_admin_home" >
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminBookingInfoFragment"
+            app:destination="@id/adminBookingInfoFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminProfileFragment"
+            app:destination="@id/adminProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/adminBookingRequestFragment"
+        android:name="com.example.vehicleserviceapp.AdminBookingRequestFragment"
+        android:label="Booking Requests"
+        tools:layout="@layout/fragment_admin_booking_request" />
+    <fragment
+        android:id="@+id/adminBookingInfoFragment"
+        android:name="com.example.vehicleserviceapp.AdminBookingInfoFragment"
+        android:label="Booking info"
+        tools:layout="@layout/fragment_admin_booking_info" >
+        <argument
+            app:nullable="true"
+            android:name="bookingInfoBundle"
+            app:argType="android.os.Bundle"
+            android:defaultValue="@null"/>
+    </fragment>
+    <fragment
+        android:id="@+id/adminProfileFragment"
+        android:name="com.example.vehicleserviceapp.AdminProfileFragment"
+        android:label="AdminProfileFragment" >
+        <argument
+            android:name="adminProfileData"
+            app:argType="android.os.Bundle" />
+    </fragment>
+
+</navigation>
