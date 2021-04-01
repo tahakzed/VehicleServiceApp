@@ -6,13 +6,16 @@ public class Admin extends User{
     private String serviceStationName;
     private List<String> reviews,bookings;
     private long chargesCar,chargesBike;
-    Admin(String name, String email, String phone, double lat, double lng, String serviceStationName, List<String> reviews,long chargesCar,long chargesBike,List<String> bookings ){
+    private String imageId;
+    Admin(String name, String email, String phone, double lat, double lng, String serviceStationName,
+          List<String> reviews,long chargesCar,long chargesBike,List<String> bookings, String imageId ){
         super(name,email,phone,lat,lng);
         this.serviceStationName=serviceStationName;
         this.reviews=reviews;
         this.chargesCar=chargesCar;
         this.chargesBike=chargesBike;
         this.bookings=bookings;
+        this.imageId=imageId;
     }
 
     public String getServiceStationName() {
@@ -33,5 +36,9 @@ public class Admin extends User{
 
     public List<String> getBookings() {
         return bookings;
+    }
+
+    public String getImageId() {
+        return imageId;
     }
 }

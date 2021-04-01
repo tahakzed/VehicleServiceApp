@@ -1,6 +1,9 @@
 package com.example.vehicleserviceapp;
 
-public class Booking {
+import java.io.Serializable;
+
+
+public class Booking implements Serializable {
     String clientEmail;
     double clientLat;
     double clientLng;
@@ -17,12 +20,14 @@ public class Booking {
     String vehicleName;
     String vehicleType;
     String bookingID;
-
+    boolean isSeenByClient;
+    String clientImageId,adminImageId;
     String status;
     String serviceStationName;
     public Booking(String bookingID, String status, String serviceStationName,String clientName, String clientPhone,String clientEmail, double clientLat,double clientLng,
                     String vehicleName,String vehicleType,String date,String time,String adminEmail,String paymentStatus,String paymentDate,
-                   String paymentTime,long paymentCharges,long paymentTip){
+                   String paymentTime,long paymentCharges,long paymentTip,boolean isSeenByClient,
+                   String clientImageId,String adminImageId){
         this.bookingID=bookingID;
         this.clientName=clientName;
         this.clientPhone=clientPhone;
@@ -33,7 +38,7 @@ public class Booking {
         this.vehicleType=vehicleType;
         this.date=date;
         this.time=time;
-
+        this.isSeenByClient=isSeenByClient;
         this.status=status;
         this.serviceStationName=serviceStationName;
         this.paymentCharges=paymentCharges;
@@ -42,6 +47,9 @@ public class Booking {
         this.paymentDate=paymentDate;
         this.paymentTime=paymentTime;
         this.paymentTip=paymentTip;
+        this.clientImageId=clientImageId;
+        this.adminImageId=adminImageId;
+
     }
 
     public long getPaymentCharges() {
@@ -114,6 +122,18 @@ public class Booking {
 
     public String getVehicleType() {
         return vehicleType;
+    }
+
+    public boolean isSeenByClient(){
+        return isSeenByClient;
+    }
+
+    public String getAdminImageId() {
+        return adminImageId;
+    }
+
+    public String getClientImageId() {
+        return clientImageId;
     }
 
 }

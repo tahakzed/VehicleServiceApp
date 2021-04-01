@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ClientToAdminReviewActivity">
+    <TextView
+        android:id="@+id/client_to_admin_review_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Admin's service station review"
+        android:textSize="25sp"
+        android:layout_margin="20dp"
+        android:textStyle="bold" />
+    <RatingBar
+        android:id="@+id/client_to_admin_rating_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:stepSize="1"
+        android:layout_marginLeft="20dp"
+        android:theme="@style/RatingBar"
+        />
+    <Button
+        android:id="@+id/client_to_admin_add_review_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:text="+ add review"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:textAllCaps="false"
+        android:textColor="@color/mid_blue"
+        />
+    <com.google.android.material.textfield.TextInputLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:hint="Write a Review"
+
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/client_to_admin_add_review_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="6"
+            android:maxLines="10"
+            android:visibility="gone"
+            android:scrollbars="vertical"
+            android:lines="8"
+            android:inputType="textMultiLine"
+            android:gravity="top|left"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
+    <Button
+        android:id="@+id/client_to_admin_done_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:textColor="@color/white"
+        android:text="Done"
+        android:drawableLeft="@drawable/done_icon"
+        android:layout_gravity="bottom"/>
+</LinearLayout>

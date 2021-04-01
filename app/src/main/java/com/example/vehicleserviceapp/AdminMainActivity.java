@@ -19,11 +19,14 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +38,7 @@ public class AdminMainActivity extends AppCompatActivity implements View.OnClick
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     View navHeader;
-    String email="adminuser@gmail.com",name,phone,serviceStationName;
+    String email="adminuser@gmail.com",name,phone,serviceStationName,imageId;
     double lat,lng;
     private AdminViewModel adminViewModel;
     NavHostFragment navHost;
@@ -67,6 +70,7 @@ public class AdminMainActivity extends AppCompatActivity implements View.OnClick
                 reviewsList=admin.getReviews();
                 chargesBike=admin.getChargesBike();
                 chargesCar=admin.getChargesCar();
+                imageId=admin.getImageId();
                 populateNavHeader(navHeader);
                 bookingIDs=admin.getBookings();
                 adminViewModel.getBookingsDataWithIds(bookingIDs).observe(AdminMainActivity.this, new Observer<List<Booking>>() {
@@ -139,6 +143,14 @@ public class AdminMainActivity extends AppCompatActivity implements View.OnClick
     private void populateNavHeader(View view){
         TextView profileName=view.findViewById(R.id.profile_name);
         TextView profileEmail=view.findViewById(R.id.profile_email);
+        ImageView profileImage=view.findViewById(R.id.profile_photo_header);
+        //load image from firebase
+        StorageReference storageReference= FirebaseStorage.getInstance().getReference();
+        StorageReference ref=storageReference.child("images/"+imageId);
+        GlideApp.with(this)
+                .load(ref)
+                .into(profileImage);
+        //load image from firebase
         profileEmail.setText(email);
         profileName.setText(name);
 
@@ -187,6 +199,7 @@ public class AdminMainActivity extends AppCompatActivity implements View.OnClick
         bundle.putDouble("lng",lng);
         bundle.putLong("chargesCar",chargesCar);
         bundle.putLong("chargesBike",chargesBike);
+        bundle.putString("imageId",imageId);
         bundle.putStringArrayList("bookings",(ArrayList<String>) bookingIDs);
         bundle.putStringArrayList("reviews",(ArrayList<String>) reviewsList);
         bundle.putString("serviceStationName",serviceStationName);

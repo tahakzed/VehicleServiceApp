@@ -77,7 +77,7 @@
         android:textColorHint="@color/white"
         app:startIconTint="@color/white"
         app:endIconMode="password_toggle"
-        app:endIconTint="@color/gray"
+        app:endIconTint="@color/my_gray1"
         app:startIconDrawable="@drawable/password_icon"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -110,7 +110,7 @@
             android:layout_height="wrap_content"
             android:text="Create a new account"
             android:layout_gravity="start"
-            android:textColor="@color/gray"
+            android:textColor="@color/my_gray1"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             />
 

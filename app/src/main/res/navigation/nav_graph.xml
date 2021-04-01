@@ -7,34 +7,42 @@
     <fragment
         android:id="@+id/clientHomeFragment"
         android:name="com.example.vehicleserviceapp.ClientHomeFragment"
+        android:label="Home"
         tools:layout="@layout/fragment_client_home" >
         <action
             android:id="@+id/action_clientHomeFragment_to_bookingFragment"
             app:destination="@id/bookingFragment"
             app:enterAnim="@android:anim/slide_in_left"
             app:exitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_clientHomeFragment_to_clientProfileFragment"
+            app:destination="@id/clientProfileFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/clientBookingFragment"
+        android:label="My Bookings"
         android:name="com.example.vehicleserviceapp.ClientBookingFragment"
         tools:layout="@layout/fragment_client_booking" />
     <fragment
         android:id="@+id/vehicleFragment"
+        android:label="My Vehicles"
         android:name="com.example.vehicleserviceapp.VehicleFragment"
         tools:layout="@layout/fragment_vehicle_list" />
     <fragment
         android:id="@+id/bookingFragment"
         android:name="com.example.vehicleserviceapp.BookingFragment"
-        android:label="fragment_booking"
+        android:label=""
         tools:layout="@layout/fragment_booking" >
         <argument
             android:name="argmnts"
             app:argType="android.os.Bundle" />
     </fragment>
     <fragment
-        android:id="@+id/clientProfileFragment2"
+        android:id="@+id/clientProfileFragment"
         android:name="com.example.vehicleserviceapp.ClientProfileFragment"
-        android:label="fragment_client_profile"
+        android:label="Profile"
         tools:layout="@layout/fragment_client_profile" >
 
         <argument

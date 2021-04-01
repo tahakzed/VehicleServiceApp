@@ -15,7 +15,7 @@
 
     </style>
     <style name="RatingBar" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorControlNormal">@color/light_gray</item>
+
         <item name="colorControlActivated">@color/dusky_yellow</item>
 
     </style>

@@ -16,6 +16,6 @@
     </style>
     <style name="RatingBar" parent="Theme.VehicleServiceApp">
         <item name="colorControlActivated">@color/dusky_yellow</item>
-        <item name="colorControlNormal">@color/light_gray</item>
+
     </style>
 </resources>

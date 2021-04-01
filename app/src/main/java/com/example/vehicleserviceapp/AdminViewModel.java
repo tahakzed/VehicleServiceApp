@@ -52,8 +52,9 @@ public class AdminViewModel extends AndroidViewModel {
                         long chargesCar=(Long)value.get("Charges Car");
                         long chargesBike=(Long)value.get("Charges Bike");
                         List<String> bookings=(List<String>)value.get("Bookings");
+                        String imageId=value.get("ImageId").toString();
                         List<Admin> admins=new ArrayList<>();
-                        Admin admin=new Admin(name,email,phone,lat,lng,serviceStationName,reviews,chargesCar,chargesBike,bookings);
+                        Admin admin=new Admin(name,email,phone,lat,lng,serviceStationName,reviews,chargesCar,chargesBike,bookings,imageId);
                         admins.add(admin);
                         adminMutableLiveData.postValue(admins);
                     }
@@ -98,7 +99,10 @@ public class AdminViewModel extends AndroidViewModel {
                                     doc.get("Payment Date").toString(),
                                     doc.get("Payment Time").toString(),
                                     (Long)doc.get("Payment Charges"),
-                                    (Long)doc.get("Payment Tip")));
+                                    (Long)doc.get("Payment Tip"),
+                                    (Boolean) doc.get("isSeenByClient"),
+                                    doc.get("Client Image Id").toString(),
+                                    doc.get("Admin Image Id").toString()));
                         }
                         adminBookings.postValue(bookings);
                     }

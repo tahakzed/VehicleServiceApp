@@ -249,9 +249,9 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
                                     dbData.put("Client Phone",cphone);
                                     dbData.put("Client Email",clientEmail);
                                     dbData.put("Service Station",serviceStationName);
+                                    dbData.put("isSeenByClient",false);
                                     String bookingID= db.collection("Bookings").document().getId();
                                     dbData.put("Booking-ID",bookingID);
-                                    db.collection("Bookings").document(bookingID).set(dbData);
                                     Map<String,Object> adminMap=new HashMap<>();
                                     db.document("Admin/"+email).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
@@ -268,6 +268,11 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
                                                 cb=new ArrayList<>();
                                             cb.add(bookingID);
                                             clientMap.put("Bookings",cb);
+                                            String adminImageId=documentSnapshot.get("ImageId").toString();
+                                            String clientImageId=documentSnapshot.get("ImageId").toString();
+                                            dbData.put("Admin Image Id",adminImageId);
+                                            dbData.put("Client Image Id",clientImageId);
+                                            db.collection("Bookings").document(bookingID).set(dbData);
                                             db.document("Client/"+clientEmail).update(clientMap).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {

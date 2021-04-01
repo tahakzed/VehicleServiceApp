@@ -1,6 +1,7 @@
 package com.example.vehicleserviceapp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -8,6 +9,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.ActivityNavigator;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -16,23 +18,40 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.GlideException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +62,7 @@ public class ClientMainActivity extends AppCompatActivity implements View.OnClic
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     View navHeader;
-    String email="tahakzed@gmail.com",name,phone;
+    String email="tahakzed@gmail.com",name,phone,imageId;
     double lat,lng;
     private MyViewModel myViewModel;
     NavHostFragment navHost;
@@ -52,18 +71,23 @@ public class ClientMainActivity extends AppCompatActivity implements View.OnClic
     int f=0;
     Bundle bundle=new Bundle();
     List<Booking> bookings=new ArrayList<>();
+    Intent clientServiceIntent;
+    private static int SERVICE_START_FLAG=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_client);
 
-
+        subscribeToToken(email);
        // Intent intent=getIntent();
         //email=intent.getStringExtra("Email");    //UNCOMMENT LATER
         //chooseUserType();
         bundle.putString("client email",email);
         initClient();
 
+    }
+    private void subscribeToToken(String topic){
+        FirebaseMessaging.getInstance().subscribeToTopic(email);
     }
 
     @Override
@@ -76,46 +100,43 @@ public class ClientMainActivity extends AppCompatActivity implements View.OnClic
                 Client client=c;
                 name=client.getName();
                 email=client.getEmail();
+                phone=client.getPhone();
+                lat=client.getLat();
+                lng=client.getLng();
+                imageId=client.getImageId();
                 populateNavHeader(navHeader);
                 bookingIDs=client.getBookings();
+                startClientBackgroundProcess();
                 myViewModel.getBookingsDataWithIds(bookingIDs).observe(ClientMainActivity.this, new Observer<List<Booking>>() {
                     @Override
                     public void onChanged(List<Booking> bs){
-                        if(bookings.size()<=bs.size()){
-                        for(int i=0;i<bookings.size();i++){
-                            if(!bookings.get(i).getStatus().equals(bs.get(i).getStatus()))
-                                notifyOnBookingChanged(bs.get(i));
-
-                        }}
-                        for(Booking b: bs){
-                            if(b.getStatus().equals("Declined"))
-                            {
-                                FirebaseFirestore db=FirebaseFirestore.getInstance();
-                                db.collection("Bookings").document(b.getBookingID())
-                                        .delete();
-                                Map<String,Object> cMap=new HashMap<>();
-                                bookingIDs.remove(b.getBookingID());
-                                cMap.put("Bookings",bookingIDs);
-                                db.collection("Client").document(email)
-                                        .update(cMap);
-                            }
-                        }
                         bookings=bs;
+
                     }
                 });
 
             }
         });
+    }
 
-
-
+    private void startClientBackgroundProcess(){
+        clientServiceIntent=new Intent(getApplicationContext(),ClientBackgroundProcess.class);
+        clientServiceIntent.putExtra("clientName",name);
+        clientServiceIntent.putExtra("bookingIds",(Serializable) bookingIDs);
+        clientServiceIntent.putExtra("clientEmail",email);
+        clientServiceIntent.setAction("clientBackgroundProcess");
+        PendingIntent pendingIntent=PendingIntent.getBroadcast(this,0,clientServiceIntent,0);
+        AlarmManager alarmManager=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,0,10,pendingIntent);
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
         myViewModel.getClientDataWithEmail(email).removeObservers(this);
+        super.onPause();
+
     }
+
 
 
     @Override
@@ -124,7 +145,7 @@ public class ClientMainActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void initClient(){
-        createNotificationChannel();
+
         navigationView=findViewById(R.id.nav_view);
         navHeader=navigationView.getHeaderView(0);
         drawerLayout=findViewById(R.id.drawer_layout);
@@ -138,58 +159,38 @@ public class ClientMainActivity extends AppCompatActivity implements View.OnClic
         navHeader.setOnClickListener(this);
     }
 
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "bookings";
-            String description = "Notification channel for booking";
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel channel = new NotificationChannel("bookings", name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
 
-    private void notifyOnBookingChanged(Booking booking){
-        Intent intent = new Intent(getApplicationContext(), ClientBookingFragment.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-
-        NotificationCompat.Builder builder=new NotificationCompat.Builder(getApplicationContext(),"bookings")
-                .setSmallIcon(R.drawable.notify_icon)
-                .setContentTitle(booking.getServiceStationName())
-                .setContentText("Your service status: "+booking.getStatus())
-                .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText("Your service status: "+booking.getStatus()))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setAutoCancel(true);
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
-
-// notificationId is a unique int for each notification that you must define
-        notificationManager.notify(1, builder.build());
-
-    }
 
     private void populateNavHeader(View view){
         TextView profileName=view.findViewById(R.id.profile_name);
         TextView profileEmail=view.findViewById(R.id.profile_email);
+        ImageView profileImage=view.findViewById(R.id.profile_photo_header);
+        //load image from firebase
+//        StorageReference storageReference=FirebaseStorage.getInstance().getReference();
+//        StorageReference ref=storageReference.child("images/"+imageId);
+//        GlideApp.with(this)
+//                .load(ref)
+//                .into(profileImage);
+        //load image from firebase
         profileEmail.setText(email);
         profileName.setText(name);
 
     }
-
     @Override
     public void onClick(View v) {
         drawerLayout.closeDrawer(GravityCompat.START);
-        Bundle client_data=new Bundle();
-        client_data.putString("client email",email);
-        navController.navigate(R.id.clientProfileFragment2,ClientProfileFragmentArgs.fromBundle(client_data).getClientData());
+        Bundle data=new Bundle();
+        data.putString("clientEmail",email);
+        data.putString("clientName",name);
+        data.putString("clientPhone",phone);
+        data.putString("clientImageId",imageId);
+        data.putDouble("Lat",lat);
+        data.putDouble("Lng",lng);
+        data.putStringArrayList("bookings",(ArrayList<String>) bookingIDs);
+        ClientHomeFragmentDirections.ActionClientHomeFragmentToClientProfileFragment action=
+                ClientHomeFragmentDirections.actionClientHomeFragmentToClientProfileFragment().setClientData(data);
+        navController.navigate(action);
     }
 
 }
+

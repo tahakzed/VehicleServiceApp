@@ -58,8 +58,9 @@ public class MyViewModel extends AndroidViewModel {
                             List<String> reviews=(List<String>) data.get("Reviews");
                             long chargesCar=(Long)data.getData().get("Charges Car");
                             long chargesBike=(Long)data.get("Charges Bike");
+                            String imageId="";//data.get("ImageId").toString();
                             List<String> Bookings=(List<String>) data.get("Bookings");
-                            admins.add(new Admin(name,email,phone,lat,lng,serviceStation,reviews,chargesCar,chargesBike,Bookings));
+                            admins.add(new Admin(name,email,phone,lat,lng,serviceStation,reviews,chargesCar,chargesBike,Bookings,imageId));
                         }
                         adminList.postValue(admins);
                     }
@@ -90,7 +91,9 @@ public class MyViewModel extends AndroidViewModel {
                     double lng=Double.parseDouble(value.get("Lng").toString());
                     List<String> vehicles=(List<String>) value.get("Vehicles");
                     List<String> Bookings=(List<String>)value.get("Bookings");
-                    Client client=new Client(name,email,phone,lat,lng,vehicles,Bookings);
+                    String imageId=value.get("ImageId").toString();
+                    Log.d("MY VIEW MODEL", "onEvent: "+imageId);
+                    Client client=new Client(name,email,phone,lat,lng,vehicles,Bookings,imageId);
                     clientMutableLiveData.postValue(client);
                 }
                 else{
@@ -134,7 +137,10 @@ public class MyViewModel extends AndroidViewModel {
                                    doc.get("Payment Date").toString(),
                                    doc.get("Payment Time").toString(),
                                    (Long)doc.get("Payment Charges"),
-                                   (Long)doc.get("Payment Tip")));
+                                   (Long)doc.get("Payment Tip"),
+                                   (Boolean) doc.get("isSeenByClient"),
+                                   doc.get("Client Image Id").toString(),
+                                   doc.get("Admin Image Id").toString()));
                        }
                        clientBookings.postValue(bookings);
                    }

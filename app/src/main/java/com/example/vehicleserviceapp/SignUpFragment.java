@@ -28,6 +28,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingService;
 
 
 import java.io.IOException;
@@ -148,11 +150,13 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
             if(userTypeStr.equals("Admin")){
                 List<String> admin_reviews=new ArrayList<>();
                 admin_reviews.add(" ;NaN; ");
-                Admin admin=new Admin(fullName,email,phone,lat,lng,serviceStation,admin_reviews,chargesCar,chargesBike,new ArrayList<String>());
+
+                Admin admin=new Admin(fullName,email,phone,lat,lng,serviceStation,admin_reviews,chargesCar,chargesBike,new ArrayList<String>(),"");
                 dbData.put("Name",admin.getName());
                 dbData.put("Email",admin.getEmail());
                 dbData.put("Phone",admin.getPhone());
                 dbData.put("Reviews",admin_reviews);
+                dbData.put("ImageId","");
                 db.document("Users/"+admin.getEmail()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -181,6 +185,13 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
                                 dbData.put("Charges Car",chargesCar);
                                 dbData.put("Charges Bike",chargesBike);
                                 dbData.put("Bookings",new ArrayList<String>());
+                                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<String> task) {
+                                        if(task.isSuccessful())
+                                        dbData.put("FCMToken",task.getResult());
+                                    }
+                                });
                                 db.document("Admin/"+admin.getEmail()).set(dbData).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
@@ -227,10 +238,11 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
             else if(userTypeStr.equals("Client")){
                 List<String> vehicleNameAndType=new ArrayList<>();
                 vehicleNameAndType.add(vehicleName+";"+vehicleTypeStr);
-                Client client=new Client(fullName,email,phone,lat,lng,vehicleNameAndType,new ArrayList<String>());
+                Client client=new Client(fullName,email,phone,lat,lng,vehicleNameAndType,new ArrayList<String>(),"");
                 dbData.put("Name",client.getName());
                 dbData.put("Email",client.getEmail());
                 dbData.put("Phone",client.getPhone());
+                dbData.put("ImageId","");
                 dbData.put("Vehicles",client.getVehicleNameAndType());
                 db.document("Users/"+client.getEmail()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -257,8 +269,16 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
                                     }
                                 });//END: add to firestore
                                 //START: add to firestore
-                                dbData.put("Vehicles",client.getVehicleNameAndType());
-                                dbData.put("Bookings",client.getBookings());
+
+                                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<String> task) {
+                                        dbData.put("Vehicles",client.getVehicleNameAndType());
+                                        dbData.put("Bookings",client.getBookings());
+                                        if(task.isSuccessful())
+                                            dbData.put("FCMToken",task.getResult());
+
+
                                 db.document("Client/"+client.getEmail()).set(dbData).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
@@ -270,6 +290,8 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
                                         Toast.makeText(getContext(),"Failed!",Toast.LENGTH_SHORT).show();
                                     }
                                 });//END: add to firestore
+                                    }
+                                });
                                 //START: add user to firebase auth
                                 auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                     @Override

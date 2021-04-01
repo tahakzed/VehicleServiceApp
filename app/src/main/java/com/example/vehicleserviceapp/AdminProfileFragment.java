@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -16,23 +17,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 
 public class AdminProfileFragment extends Fragment implements View.OnClickListener {
 
-    private String serviceStationName,email,phone,address;
+    private String serviceStationName,email,phone,address,imageId;
     private float rating;
     private long chargesCar,chargesBike;
     private List<String> reviewsList;
@@ -41,12 +46,16 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
     private TextView ratingTv,bookingCountTv;
     private RatingBar ratingBar;
     private RecyclerView recyclerView;
+    private ImageView profilePhoto,profilePhotoSettings;
     private ReviewsRecyclerAdapter adapter;
     private View view;
     private double lat,lng;
     private FloatingActionButton settingsFab;
     private int FAB_CLICK_FLAG=0;
     private static final int MAPS_ACTIVITY_REQUEST_CODE=1;
+    private static final int PICK_IMAGE_REQUEST=2;
+    private FirebaseFirestore db;
+    private Uri imageUri=null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,6 +78,8 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
         recyclerView=view.findViewById(R.id.admin_profile_reviews_recycler_view);
         chargesTv=view.findViewById(R.id.admin_profile_charges);
         settingsFab=view.findViewById(R.id.admin_profile_settings_fab);
+        profilePhoto=view.findViewById(R.id.admin_profile_pic);
+        profilePhotoSettings=view.findViewById(R.id.admin_profile_pic_set_icon);
         settingsFab.setOnClickListener(this);
     }
 
@@ -85,6 +96,7 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
         chargesCar=args.getLong("chargesCar");
         chargesBike=args.getLong("chargesBike");
         bookingsList=args.getStringArrayList("bookings");
+        imageId=args.getString("imageId");
         adapter=new ReviewsRecyclerAdapter(reviewsList);
 
     }
@@ -100,6 +112,13 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
         phoneTv.setText(phone);
         addressTv.setText(address);
         chargesTv.setText("Car: "+chargesCar+", Bike: "+chargesBike);
+        //load image from firebase
+        StorageReference storageReference= FirebaseStorage.getInstance().getReference();
+        StorageReference ref=storageReference.child("images/"+imageId);
+        GlideApp.with(this)
+                .load(ref)
+                .into(profilePhoto);
+        //load image from firebase
 
     }
     private float calculateRating(){
@@ -133,6 +152,21 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
         }
         return address;
     }
+    private void updateBookings(){
+        Map<String,Object> adminMap=new HashMap<>();
+        adminMap.put("Admin Email",email);
+        adminMap.put("Service Station",serviceStationName);
+        adminMap.put("Admin Phone",phone);
+        for(String id: bookingsList){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    db.collection("Bookings")
+                            .document(id).update(adminMap);
+                }
+            }).start();
+        }
+    }
 
     @Override
     public void onClick(View v) {
@@ -140,7 +174,8 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
         switch (id){
             case R.id.admin_profile_settings_fab:
                 if(FAB_CLICK_FLAG==0){
-
+                profilePhoto.setAlpha((float)0.6);
+                profilePhoto.setOnClickListener(this);
                 stationNameTv.setEnabled(true);
                 phoneTv.setEnabled(true);
                 addressTv.setEnabled(true);
@@ -153,6 +188,8 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
                 }
                 else if(FAB_CLICK_FLAG==1)
                 {
+                    if(imageUri!=null)
+                        uploadImage();
                     phone=phoneTv.getText().toString();
                     address=addressTv.getText().toString();
                     serviceStationName=stationNameTv.getText().toString();
@@ -165,12 +202,16 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
                     adminMap.put("Charged Bike",chargesBike);
                     adminMap.put("Lat",lat);
                     adminMap.put("Lng",lng);
-                    FirebaseFirestore.getInstance().collection("Admin")
+                    db=FirebaseFirestore.getInstance();
+                    db.collection("Admin")
                             .document(email).update(adminMap);
+                    updateBookings();
                     phoneTv.setText(phone);
                     addressTv.setText(address);
                     stationNameTv.setText(serviceStationName);
                     chargesTv.setText(charges);
+                    profilePhoto.setAlpha((float)1);
+                    profilePhoto.setOnClickListener(null);
                     stationNameTv.setEnabled(false);
                     phoneTv.setEnabled(false);
                     addressTv.setEnabled(false);
@@ -207,9 +248,26 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
                 });
                 builder.show();
                 break;
+            case R.id.admin_profile_pic:
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_PICK);
+                startActivityForResult(
+                        Intent.createChooser(
+                                intent,
+                                "Select Image from here..."),
+                        PICK_IMAGE_REQUEST);
+                break;
         }
     }
-
+    private void uploadImage(){
+        FirebaseStorage storage=FirebaseStorage.getInstance();
+        StorageReference storageReference=storage.getReference();
+        imageId= UUID.randomUUID().toString();
+        StorageReference ref=storageReference
+                .child("images/"+imageId);
+        ref.putFile(imageUri);
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -219,6 +277,12 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
             lng=data.getDoubleExtra("Lng",-1);
             address=getAddress(lat,lng).getAddressLine(0);
             addressTv.setText(address);
+        }
+        else if(requestCode==PICK_IMAGE_REQUEST && resultCode==getActivity().RESULT_OK && data!=null){
+            if(data.getData()==null)
+                return;
+            imageUri=data.getData();
+            profilePhoto.setImageURI(imageUri);
         }
     }
 }
