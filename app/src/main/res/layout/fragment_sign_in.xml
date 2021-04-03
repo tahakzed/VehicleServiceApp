@@ -6,11 +6,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SignInFragment"
-    android:background="@drawable/blue_color_design"
-    android:backgroundTint="@color/mid_blue"
-    android:backgroundTintMode="multiply"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/black">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/car_wash_bg"
+        android:scaleType="centerCrop"
+        android:alpha="0.6"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/gradient00"
+        />
     <LinearLayout
         android:layout_gravity="top"
         android:layout_width="match_parent"
@@ -56,24 +66,26 @@
         android:hint="E-mail"
         android:textColorHint="@color/white"
         app:startIconTint="@color/white"
-
+        android:id="@+id/client_email_signin_layout"
         app:startIconDrawable="@drawable/email_icon"
-
+        app:errorEnabled="true"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/email_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             />
 
     </com.google.android.material.textfield.TextInputLayout>
     <com.google.android.material.textfield.TextInputLayout
-
+        android:id="@+id/client_pass_signin_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="15dp"
         android:hint="Password"
+        app:errorEnabled="true"
         android:textColorHint="@color/white"
         app:startIconTint="@color/white"
         app:endIconMode="password_toggle"
@@ -86,6 +98,7 @@
             android:inputType="textPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             />
 
     </com.google.android.material.textfield.TextInputLayout>

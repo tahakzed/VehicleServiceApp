@@ -3,12 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ClientBookingFragment">
-
+    tools:context=".ClientBookingFragment"
+    android:background="@color/black">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/car_wash_bg2"
+        android:alpha="0.5"
+        android:scaleType="centerCrop"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/gradient00"
+        />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/client_booking_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layoutAnimation="@anim/layout_animation"
         />
 
 </FrameLayout>

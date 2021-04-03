@@ -1,5 +1,6 @@
 package com.example.vehicleserviceapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -10,9 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.navigation.Navigation;
 
 
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,15 +35,18 @@ public class AdminHomeFragment extends Fragment implements OnNoteListener {
                              Bundle savedInstanceState) {
         view=inflater.inflate(R.layout.fragment_admin_home, container, false);
         init();
-
         return view;
     }
+    private String getAdminEmailFromSharedPreferences(){
+        SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getContext());
+        return sharedPreferences.getString("Email","");
+    }
     private void init(){
-        adminEmail="adminuser@gmail.com";
+        adminEmail=getAdminEmailFromSharedPreferences();
         bookingIDs=new ArrayList<>();
         bookings=new ArrayList<>();
         bookingRecyclerView=view.findViewById(R.id.admin_booking_list);
-        adapter=new AdminBookingRecyclerViewAdapter(bookings,this);
+        adapter=new AdminBookingRecyclerViewAdapter(bookings,this,getContext());
         adminViewModel=new ViewModelProvider(getActivity()).get(AdminViewModel.class);
         adminViewModel.getAdminDataWithEmail(adminEmail).observe(getViewLifecycleOwner(), new Observer<List<Admin>>() {
             @Override
@@ -83,6 +89,7 @@ public class AdminHomeFragment extends Fragment implements OnNoteListener {
         String clientPhone=booking.getClientPhone();
         String bookingId=booking.getBookingID();
         String clientEmail=booking.getClientEmail();
+        String clientImageId=booking.getClientImageId();
         Bundle bundle=new Bundle();
         bundle.putString("clientName",clientName);
         bundle.putString("clientEmail",clientEmail);
@@ -96,6 +103,8 @@ public class AdminHomeFragment extends Fragment implements OnNoteListener {
         bundle.putString("status",status);
         bundle.putDouble("lat",lat);
         bundle.putDouble("lng",lng);
+        if(!clientImageId.equals(""))
+            bundle.putString("clientImageId",clientImageId);
         AdminHomeFragmentDirections.ActionAdminHomeFragmentToAdminBookingInfoFragment action=
                 AdminHomeFragmentDirections.actionAdminHomeFragmentToAdminBookingInfoFragment().setBookingInfoBundle(bundle);
         Navigation.findNavController(view).navigate(action);

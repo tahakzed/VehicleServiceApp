@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    >
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
 <LinearLayout
     android:layout_width="match_parent"
@@ -75,7 +74,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/black"
             android:textStyle="bold"
-            android:textSize="30sp"
+            android:textSize="20sp"
             />
         <LinearLayout
             android:layout_width="match_parent"
@@ -114,6 +113,26 @@
                 android:textSize="15dp"
                 android:layout_height="wrap_content"
                 android:text="1:21am"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:tint="@color/mid_blue"
+                android:src="@drawable/id_icon"
+                />
+            <TextView
+                android:id="@+id/booking_info_bookings_id"
+                android:layout_marginLeft="10dp"
+                android:layout_width="wrap_content"
+                android:textSize="15dp"
+                android:layout_height="wrap_content"
+                android:text="Booking Id # AoS8Xd"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -208,22 +227,18 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             />
     </LinearLayout>
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/booking_info_payment_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:backgroundTint="@color/mid_blue"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="20dp"
-            app:icon="@drawable/payment_icon"
-            app:iconTint="@color/white"
-            android:text="Add payment"
-            android:textColor="@color/white"
-            />
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
 </LinearLayout>
-</ScrollView>
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/booking_info_payment_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:backgroundTint="@color/mid_blue"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        app:icon="@drawable/payment_icon"
+        app:iconTint="@color/white"
+        android:text="Add payment"
+        android:textColor="@color/white"
+        />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

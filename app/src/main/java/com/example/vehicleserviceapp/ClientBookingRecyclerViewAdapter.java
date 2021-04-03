@@ -1,5 +1,6 @@
 package com.example.vehicleserviceapp;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,10 +17,12 @@ import java.util.List;
 public class ClientBookingRecyclerViewAdapter extends RecyclerView.Adapter<ClientBookingRecyclerViewAdapter.ViewHolder> {
     private List<Booking> bookings;
     private OnNoteListener onNoteListener;
+    private Context context;
 
-    public ClientBookingRecyclerViewAdapter(List<Booking> bookings, OnNoteListener onNoteListener) {
+    public ClientBookingRecyclerViewAdapter(List<Booking> bookings, OnNoteListener onNoteListener,Context context) {
         this.bookings=bookings;
         this.onNoteListener=onNoteListener;
+        this.context=context;
 
     }
 
@@ -41,7 +44,14 @@ public class ClientBookingRecyclerViewAdapter extends RecyclerView.Adapter<Clien
             holder.getVehicleNameTv().setText("Vehicle name: "+booking.getVehicleName());
             holder.getVehicleTypeTv().setText("Vehicle type: "+booking.getVehicleType());
             holder.getStatusTv().setText("Status: "+booking.getStatus());
-            Log.d("BOOKING ADAPTEr", "onBindViewHolder: "+booking.getVehicleName());
+            if(booking.getStatus().equals("Pending"))
+                holder.getStatusTv().setTextColor(context.getResources().getColor(R.color.pending_color));
+            else if(booking.getStatus().equals("In-Progress"))
+                holder.getStatusTv().setTextColor(context.getResources().getColor(R.color.in_progress_color));
+            else if(booking.getStatus().equals("Completed"))
+                holder.getStatusTv().setTextColor(context.getResources().getColor(R.color.mid_blue));
+            String bookingId=booking.getBookingID();
+            holder.getBookingIdTv().setText("Booking Id # "+bookingId.substring(0,3)+bookingId.substring(bookingId.length()-4,bookingId.length()));
         }
     }
 
@@ -64,6 +74,7 @@ public class ClientBookingRecyclerViewAdapter extends RecyclerView.Adapter<Clien
         private TextView statusTv;
         private TextView vehicleNameTv;
         private TextView vehicleTypeTv;
+        private TextView bookingIdTv;
         private OnNoteListener onNoteListener;
         public ViewHolder(View view, OnNoteListener onNoteListener) {
             super(view);
@@ -73,6 +84,7 @@ public class ClientBookingRecyclerViewAdapter extends RecyclerView.Adapter<Clien
             this.statusTv=view.findViewById(R.id.client_booking_status);
             this.vehicleNameTv=view.findViewById(R.id.client_vehicle_name);
             this.vehicleTypeTv=view.findViewById(R.id.client_vehicle_type);
+            this.bookingIdTv=view.findViewById(R.id.client_booking_id);
             this.onNoteListener=onNoteListener;
             itemView.setOnLongClickListener(this);
         }
@@ -99,6 +111,10 @@ public class ClientBookingRecyclerViewAdapter extends RecyclerView.Adapter<Clien
 
         public TextView getVehicleTypeTv() {
             return vehicleTypeTv;
+        }
+
+        public TextView getBookingIdTv() {
+            return bookingIdTv;
         }
 
         @Override

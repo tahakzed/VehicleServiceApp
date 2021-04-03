@@ -58,7 +58,7 @@ public class MyViewModel extends AndroidViewModel {
                             List<String> reviews=(List<String>) data.get("Reviews");
                             long chargesCar=(Long)data.getData().get("Charges Car");
                             long chargesBike=(Long)data.get("Charges Bike");
-                            String imageId="";//data.get("ImageId").toString();
+                            String imageId=data.get("ImageId").toString();
                             List<String> Bookings=(List<String>) data.get("Bookings");
                             admins.add(new Admin(name,email,phone,lat,lng,serviceStation,reviews,chargesCar,chargesBike,Bookings,imageId));
                         }
@@ -139,6 +139,8 @@ public class MyViewModel extends AndroidViewModel {
                                    (Long)doc.get("Payment Charges"),
                                    (Long)doc.get("Payment Tip"),
                                    (Boolean) doc.get("isSeenByClient"),
+                                   (Boolean) doc.get("isSeenByAdmin"),
+                                   (Boolean) doc.get("isSeenInProgressByClient"),
                                    doc.get("Client Image Id").toString(),
                                    doc.get("Admin Image Id").toString()));
                        }

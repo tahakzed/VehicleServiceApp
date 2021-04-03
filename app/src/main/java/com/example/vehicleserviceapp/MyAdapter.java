@@ -6,10 +6,14 @@ import android.location.Geocoder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,8 +43,22 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             holder.getServiceStationName().setText(admins.get(position).getServiceStationName());
             holder.getCityName().setText(address.getLocality()+", "+address.getCountryName());
             holder.getEmail().setText(admins.get(position).getEmail());
-
+            ImageView profilePhoto=holder.getImageView();
+            String imageId=admins.get(position).getImageId();
+            setImage(profilePhoto,imageId);
         }
+    }
+    private void setImage(ImageView profilePhoto,String imageId){
+        //load image from firebase
+        if(imageId.equals(""))
+        {profilePhoto.setImageResource(R.drawable.blue_color_design);
+        return; }
+        StorageReference storageReference= FirebaseStorage.getInstance().getReference();
+        StorageReference ref=storageReference.child("images/"+imageId);
+        GlideApp.with(context)
+                .load(ref)
+                .into(profilePhoto);
+        //load image from firebase
     }
     private Address getAddress(double lat, double lng){
         Geocoder geo=new Geocoder(context, Locale.getDefault());
@@ -68,12 +86,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         private TextView serviceStationName;
         private TextView cityName;
         private TextView email;
+        private ImageView imageView;
         private OnNoteListener onNoteListener;
         public ViewHolder(View view,OnNoteListener onNoteListener){
             super(view);
             serviceStationName=view.findViewById(R.id.service_station_name);
             cityName=view.findViewById(R.id.city_name);
             email=view.findViewById(R.id.email_id_admin);
+            imageView=view.findViewById(R.id.client_recycler_view_service_img);
             itemView.setOnClickListener(this);
             this.onNoteListener=onNoteListener;
         }
@@ -88,6 +108,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         public TextView getServiceStationName() {
             return serviceStationName;
+        }
+
+        public ImageView getImageView() {
+            return imageView;
         }
 
         @Override

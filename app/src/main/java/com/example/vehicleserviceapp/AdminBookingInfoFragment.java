@@ -24,6 +24,8 @@ import android.widget.TimePicker;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -41,15 +43,18 @@ public class AdminBookingInfoFragment extends Fragment implements View.OnClickLi
     private TextView statusTv;
     private TextView vehicleNameTv;
     private TextView addressTv;
+    private TextView bookingIdTv;
     private Button mapBtn;
     private Button phoneBtn;
     private Button emailBtn;
     private ImageView vehicleIcon;
     private ExtendedFloatingActionButton paymentExFab;
     private View view;
-    private String bookingId,clientName,clientEmail,date,time,status,address,vehicleName,vehicleType,clientPhone,paymentDate,paymentTime;
+    private String clientImageId,bookingId,clientName,clientEmail,date,time,status,address,
+            vehicleName,vehicleType,clientPhone,paymentDate,paymentTime;
     private double lat,lng;
     private long charges,paymentTip;
+    private ImageView clientPhoto;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -72,6 +77,8 @@ public class AdminBookingInfoFragment extends Fragment implements View.OnClickLi
         emailBtn=view.findViewById(R.id.booking_info_client_emailbtn);
         vehicleIcon=view.findViewById(R.id.booking_info_vehicle_type_icon);
         paymentExFab=view.findViewById(R.id.booking_info_payment_btn);
+        clientPhoto=view.findViewById(R.id.booking_info_client_photo);
+        bookingIdTv=view.findViewById(R.id.booking_info_bookings_id);
         paymentExFab.setOnClickListener(this);
         mapBtn.setOnClickListener(this);
         phoneBtn.setOnClickListener(this);
@@ -103,6 +110,7 @@ public class AdminBookingInfoFragment extends Fragment implements View.OnClickLi
         vehicleType=args.getString("vehicleType");
         charges=args.getLong("paymentCharges");
         bookingId=args.getString("bookingId");
+        clientImageId=args.getString("clientImageId");
         address=getAddress(lat,lng).getAddressLine(0);
     }
     private void setData(){
@@ -112,12 +120,27 @@ public class AdminBookingInfoFragment extends Fragment implements View.OnClickLi
         statusTv.setText(status);
         timeTv.setText(time);
         dateTv.setText(date);
+        bookingIdTv.setText("Booking Id # "+bookingId.substring(0,3)+bookingId.substring(bookingId.length()-4));
         vehicleNameTv.setText(vehicleName);
         if(vehicleType.equals("Car"))
             vehicleIcon.setImageResource(R.drawable.car_icon2);
         else if(vehicleType.equals("Bike"))
             vehicleIcon.setImageResource(R.drawable.bike_icon2);
         addressTv.setText(address);
+        setClientImage(clientPhoto,clientImageId);
+    }
+    private void setClientImage(ImageView profileImage,String imageId){
+        if(imageId==null){
+            profileImage.setImageResource(R.drawable.blue_color_design);
+            return;
+        }
+        //load image from firebase
+        StorageReference storageReference= FirebaseStorage.getInstance().getReference();
+        StorageReference ref=storageReference.child("images/"+imageId);
+        GlideApp.with(this)
+                .load(ref)
+                .into(profileImage);
+        //load image from firebase
     }
 
     @Override

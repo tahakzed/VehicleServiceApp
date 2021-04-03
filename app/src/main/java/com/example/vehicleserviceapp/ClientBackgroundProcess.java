@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.SystemClock;
+import android.util.Log;
 ;
 
 import androidx.annotation.Nullable;
@@ -44,6 +45,10 @@ public class ClientBackgroundProcess extends BroadcastReceiver {
         clientName=intent.getStringExtra("clientName");
         bookingIDs=(List<String>) intent.getSerializableExtra("bookingIds");
         clientEmail=intent.getStringExtra("clientEmail");
+        if(bookingIDs==null)
+            return;
+        if(bookingIDs.size()==0)
+            return;
         db.collection("Bookings").whereIn("Booking-ID",bookingIDs).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -54,6 +59,7 @@ public class ClientBackgroundProcess extends BroadcastReceiver {
                         String bookingId=doc.getId();
                         String status=doc.get("Status").toString();
                         boolean isSeenByClient=(Boolean)doc.get("isSeenByClient");
+                        boolean isSeenInProgressByClient=(Boolean)doc.get("isSeenInProgressByClient");
                         String serviceStation=doc.get("Service Station").toString();
                         if (status.equals("Complete") && !isSeenByClient) {
                             Map<String, Object> bMap = new HashMap<>();
@@ -80,12 +86,20 @@ public class ClientBackgroundProcess extends BroadcastReceiver {
                                     .update(cMap);
                             notifyOnBookingChanged(serviceStation,bookingId, "Your service request was declined", null);
                         }
+                        else if (status.equals("In-Progress") && !isSeenInProgressByClient) {
+                            Map<String, Object> bMap = new HashMap<>();
+                            bMap.put("isSeenInProgressByClient", true);
+                            db.collection("Bookings")
+                                    .document(bookingId).update(bMap);
+                            notifyOnBookingChanged(serviceStation,bookingId, "Your service request was accepted!", null);
+                        }
+
 
                     }
                 }
             }
         });
-        SystemClock.sleep(500);
+        SystemClock.sleep(10);
     }
 
     private void createNotificationChannel(String bookingId) {

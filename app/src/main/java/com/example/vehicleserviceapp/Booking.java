@@ -20,13 +20,13 @@ public class Booking implements Serializable {
     String vehicleName;
     String vehicleType;
     String bookingID;
-    boolean isSeenByClient;
+    boolean isSeenByClient,isSeenByAdmin,isSeenInProgressByClient;
     String clientImageId,adminImageId;
     String status;
     String serviceStationName;
     public Booking(String bookingID, String status, String serviceStationName,String clientName, String clientPhone,String clientEmail, double clientLat,double clientLng,
                     String vehicleName,String vehicleType,String date,String time,String adminEmail,String paymentStatus,String paymentDate,
-                   String paymentTime,long paymentCharges,long paymentTip,boolean isSeenByClient,
+                   String paymentTime,long paymentCharges,long paymentTip,boolean isSeenByClient, boolean isSeenByAdmin, boolean isSeenInProgressByClient,
                    String clientImageId,String adminImageId){
         this.bookingID=bookingID;
         this.clientName=clientName;
@@ -49,6 +49,8 @@ public class Booking implements Serializable {
         this.paymentTip=paymentTip;
         this.clientImageId=clientImageId;
         this.adminImageId=adminImageId;
+        this.isSeenByAdmin=isSeenByAdmin;
+        this.isSeenInProgressByClient=isSeenInProgressByClient;
 
     }
 
@@ -136,4 +138,11 @@ public class Booking implements Serializable {
         return clientImageId;
     }
 
+    public boolean isSeenByAdmin(){
+        return isSeenByAdmin;
+    }
+
+    public boolean isSeenInProgressByClient() {
+        return isSeenInProgressByClient;
+    }
 }

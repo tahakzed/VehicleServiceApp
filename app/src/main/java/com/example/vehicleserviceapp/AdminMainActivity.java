@@ -1,5 +1,6 @@
 package com.example.vehicleserviceapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -12,22 +13,28 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +45,7 @@ public class AdminMainActivity extends AppCompatActivity implements View.OnClick
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     View navHeader;
-    String email="adminuser@gmail.com",name,phone,serviceStationName,imageId;
+    String email,name,phone,serviceStationName,imageId;
     double lat,lng;
     private AdminViewModel adminViewModel;
     NavHostFragment navHost;
@@ -50,6 +57,8 @@ public class AdminMainActivity extends AppCompatActivity implements View.OnClick
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_main);
+        Intent intent=getIntent();
+        email=intent.getStringExtra("Email");
         initAdmin();
     }
 
@@ -73,83 +82,34 @@ public class AdminMainActivity extends AppCompatActivity implements View.OnClick
                 imageId=admin.getImageId();
                 populateNavHeader(navHeader);
                 bookingIDs=admin.getBookings();
-                adminViewModel.getBookingsDataWithIds(bookingIDs).observe(AdminMainActivity.this, new Observer<List<Booking>>() {
-                    @Override
-                    public void onChanged(List<Booking> bookings) {
-                        for(Booking b: bookings) {
-                            if(b.getStatus().equals("Cancelled"))
-                            {notifyOnBookingCanceled(b);
-                            FirebaseFirestore db=FirebaseFirestore.getInstance();
-                                db.collection("Bookings")
-                                        .document(b.getBookingID()).delete();
-                                bookingIDs.remove(b.getBookingID());
-                                Map<String,Object> aMap=new HashMap<>();
-                                aMap.put("Bookings",bookingIDs);
-                                db.collection("Admin").document(email)
-                                        .update(aMap);
-                            }
-                            else if(b.getStatus().equals("Pending"))
-                                notifyOnNewBookingRequest(b);
-
-                        }
-                    }
-                });
+                startAdminBackgroundProcess();
             }
         });
     }
-
-
-    private void notifyOnNewBookingRequest(Booking booking){
-        createNotificationChannel(booking.getBookingID());
-        Intent intent = new Intent(getApplicationContext(), ClientBookingFragment.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-
-        NotificationCompat.Builder builder=new NotificationCompat.Builder(getApplicationContext(),"admin"+booking.getBookingID())
-                .setSmallIcon(R.drawable.notify_icon)
-                .setContentTitle("New Booking Request!")
-                .setContentText("You got a new booking from "+booking.getClientName())
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setAutoCancel(true);
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
-
-// notificationId is a unique int for each notification that you must define
-        notificationManager.notify(1, builder.build());
+    private void startAdminBackgroundProcess(){
+        Intent intent=new Intent(getApplicationContext(),AdminBackgroundProcess.class);
+        intent.putExtra("reviewList",(Serializable) reviewsList);
+        intent.putExtra("bookingIds",(Serializable) bookingIDs);
+        intent.putExtra("adminEmail",email);
+        intent.setAction("adminBackgroundProcess");
+        PendingIntent pendingIntent=PendingIntent.getBroadcast(this,0,intent,0);
+        AlarmManager alarmManager=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,0,10,pendingIntent);
     }
 
-    private void notifyOnBookingCanceled(Booking booking){
-        createNotificationChannel(booking.getBookingID());
-        Intent intent = new Intent(getApplicationContext(), ClientBookingFragment.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
 
-        NotificationCompat.Builder builder=new NotificationCompat.Builder(getApplicationContext(),"admin"+booking.getBookingID())
-                .setSmallIcon(R.drawable.notify_icon)
-                .setContentTitle("Booking Canceled!")
-                .setContentText("You client: "+booking.getClientName()+" canceled his booking with you."+"\n" +
-                        "Booking Data: "+booking.getDate()+"\n" +
-                        "Booking Time: "+booking.getTime())
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setAutoCancel(true);
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
 
-// notificationId is a unique int for each notification that you must define
-        notificationManager.notify(1, builder.build());
-    }
     private void populateNavHeader(View view){
         TextView profileName=view.findViewById(R.id.profile_name);
         TextView profileEmail=view.findViewById(R.id.profile_email);
         ImageView profileImage=view.findViewById(R.id.profile_photo_header);
         //load image from firebase
-        StorageReference storageReference= FirebaseStorage.getInstance().getReference();
+        if(!imageId.equals(""))
+        {StorageReference storageReference= FirebaseStorage.getInstance().getReference();
         StorageReference ref=storageReference.child("images/"+imageId);
         GlideApp.with(this)
                 .load(ref)
-                .into(profileImage);
+                .into(profileImage);}
         //load image from firebase
         profileEmail.setText(email);
         profileName.setText(name);
@@ -171,22 +131,9 @@ public class AdminMainActivity extends AppCompatActivity implements View.OnClick
         NavigationUI.setupWithNavController(navigationView,navController);
         navigationView.getHeaderView(0);
         navHeader.setOnClickListener(this);
+
     }
-    private void createNotificationChannel(String bookingId) {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "admin"+bookingId;
-            String description = "Notification channel for admin"+bookingId;
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel channel = new NotificationChannel("admin"+bookingId, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
+
 
     @Override
     public void onClick(View v) {

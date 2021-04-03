@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -20,6 +21,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,12 +55,15 @@ public class ClientBookingFragment extends Fragment implements OnNoteListener{
         return view;
     }
     private void init(){
-       // clientEmail=getArguments().getString("client email");
-        clientEmail="tahakzed@gmail.com";
+        clientEmail=getClientEmailFromSharedPreferences();
         bookingRecyclerView=view.findViewById(R.id.client_booking_list);
-        adapter=new ClientBookingRecyclerViewAdapter(bookings,this);
+        adapter=new ClientBookingRecyclerViewAdapter(bookings,this,getContext());
         bookingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         bookingRecyclerView.setAdapter(adapter);
+    }
+    private String getClientEmailFromSharedPreferences(){
+        SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getContext());
+        return sharedPreferences.getString("Email","");
     }
 
     @Override
@@ -107,7 +112,7 @@ public class ClientBookingFragment extends Fragment implements OnNoteListener{
                             }
                         });
                         Map<String,Object> bMap=new HashMap<>();
-                        bMap.put("Status","Cancelled");
+                        bMap.put("Status","Canceled");
                         db.collection("Bookings").document(removeId).update(bMap);
                         dialog.dismiss();
                     }

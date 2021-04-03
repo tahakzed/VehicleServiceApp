@@ -43,5 +43,10 @@
             android:name="adminProfileData"
             app:argType="android.os.Bundle" />
     </fragment>
+    <fragment
+        android:id="@+id/logoutfragment"
+        android:name="com.example.vehicleserviceapp.logoutfragment"
+        android:label="Sign-out"
+        tools:layout="@layout/fragment_logoutfragment" />
 
 </navigation>

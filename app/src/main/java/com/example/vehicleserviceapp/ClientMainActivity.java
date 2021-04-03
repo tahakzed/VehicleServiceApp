@@ -30,9 +30,11 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,6 +48,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
@@ -62,14 +65,13 @@ public class ClientMainActivity extends AppCompatActivity implements View.OnClic
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     View navHeader;
-    String email="tahakzed@gmail.com",name,phone,imageId;
+    String email,name,phone,imageId;
     double lat,lng;
     private MyViewModel myViewModel;
     NavHostFragment navHost;
     NavController navController;
     List<String> bookingIDs;
     int f=0;
-    Bundle bundle=new Bundle();
     List<Booking> bookings=new ArrayList<>();
     Intent clientServiceIntent;
     private static int SERVICE_START_FLAG=0;
@@ -77,17 +79,10 @@ public class ClientMainActivity extends AppCompatActivity implements View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_client);
-
-        subscribeToToken(email);
-       // Intent intent=getIntent();
-        //email=intent.getStringExtra("Email");    //UNCOMMENT LATER
-        //chooseUserType();
-        bundle.putString("client email",email);
+        Intent intent=getIntent();
+        email=intent.getStringExtra("Email");
         initClient();
 
-    }
-    private void subscribeToToken(String topic){
-        FirebaseMessaging.getInstance().subscribeToTopic(email);
     }
 
     @Override
@@ -157,6 +152,7 @@ public class ClientMainActivity extends AppCompatActivity implements View.OnClic
         NavigationUI.setupWithNavController(navigationView,navController);
         navigationView.getHeaderView(0);
         navHeader.setOnClickListener(this);
+
     }
 
 
@@ -165,12 +161,14 @@ public class ClientMainActivity extends AppCompatActivity implements View.OnClic
         TextView profileName=view.findViewById(R.id.profile_name);
         TextView profileEmail=view.findViewById(R.id.profile_email);
         ImageView profileImage=view.findViewById(R.id.profile_photo_header);
+
         //load image from firebase
-//        StorageReference storageReference=FirebaseStorage.getInstance().getReference();
-//        StorageReference ref=storageReference.child("images/"+imageId);
-//        GlideApp.with(this)
-//                .load(ref)
-//                .into(profileImage);
+        if(!imageId.equals("")){
+        StorageReference storageReference=FirebaseStorage.getInstance().getReference();
+        StorageReference ref=storageReference.child("images/"+imageId);
+        GlideApp.with(this)
+                .load(ref)
+                .into(profileImage);}
         //load image from firebase
         profileEmail.setText(email);
         profileName.setText(name);

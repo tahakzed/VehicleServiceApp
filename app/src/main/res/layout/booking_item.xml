@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="20dp"
     app:cardElevation="10dp"
-    android:layout_height="150dp">
+    android:layout_height="170dp">
     <LinearLayout
         android:padding="8dp"
         android:orientation="vertical"
@@ -31,6 +31,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Date: 19/3/2021"/>
+        <TextView
+            android:layout_marginLeft="5dp"
+            android:id="@+id/client_booking_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Booking ID # A0s7Z9 "/>
         <TextView
             android:layout_marginLeft="5dp"
             android:id="@+id/client_vehicle_name"

@@ -7,10 +7,13 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="my_gray1">#25FFFFFF</color>
+    <color name="my_gray1">#8BFFFFFF</color>
     <color name="start_blue">#2243FA</color>
     <color name="mid_blue">#2283FA</color>
     <color name="end_blue">#7C22FA</color>
     <color name="light_gray">#DCFFFFFF</color>
     <color name="dusky_yellow">#F8C323</color>
+    <color name="pending_color">#9F7C13</color>
+    <color name="in_progress_color">#268C14</color>
+    <color name="completed_color">#F8C323</color>
 </resources>

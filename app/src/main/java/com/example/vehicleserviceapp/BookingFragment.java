@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -36,6 +37,8 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -60,6 +63,8 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
     List<String> reviews_list,adminBookings;
     String date,time;
     ReviewsRecyclerAdapter recyclerAdapter;
+    ImageView profileImage;
+    String imageId;
 
 
 
@@ -77,7 +82,7 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
         recyclerView=view.findViewById(R.id.reviews_recycler_view);
         //fab
         fab=view.findViewById(R.id.fab);
-
+        profileImage=view.findViewById(R.id.booking_service_profile_pic);
         phoneFab=view.findViewById(R.id.phone_fab);
         emailFab=view.findViewById(R.id.email_fab);
         locFab=view.findViewById(R.id.loc_fab);
@@ -104,6 +109,7 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
         serviceStationName=args.getString("service station");
         lat=args.getDouble("lat");
         lng=args.getDouble("lng");
+        imageId=args.getString("imageId");
         reviews_list=args.getStringArrayList("reviews");
         chargesCar=args.getLong("chargesCar");
         chargesBike=args.getLong("chargesBike");
@@ -116,6 +122,19 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
         float rate=calculateRating();
         ratingBar.setRating(rate);
         ratingBarTv.setText("("+rate+"),");
+        setImage(profileImage,imageId);
+    }
+    private void setImage(ImageView profilePhoto,String imageId){
+        //load image from firebase
+        if(imageId==null)
+        {profilePhoto.setImageResource(R.drawable.blue_color_design);
+        return;}
+        StorageReference storageReference= FirebaseStorage.getInstance().getReference();
+        StorageReference ref=storageReference.child("images/"+imageId);
+        GlideApp.with(getContext())
+                .load(ref)
+                .into(profilePhoto);
+        //load image from firebase
     }
     private void bookService(){
         Calendar cal=Calendar.getInstance();
@@ -250,6 +269,8 @@ public class BookingFragment extends Fragment implements View.OnClickListener, D
                                     dbData.put("Client Email",clientEmail);
                                     dbData.put("Service Station",serviceStationName);
                                     dbData.put("isSeenByClient",false);
+                                    dbData.put("isSeenInProgressByClient",false);
+                                    dbData.put("isSeenByAdmin",false);
                                     String bookingID= db.collection("Bookings").document().getId();
                                     dbData.put("Booking-ID",bookingID);
                                     Map<String,Object> adminMap=new HashMap<>();

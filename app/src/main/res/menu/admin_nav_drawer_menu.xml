@@ -21,7 +21,7 @@
         <item
             android:id="@+id/admin_feedback"
             android:title="Feedback"/>
-        <item android:id="@+id/admin_logout"
+        <item android:id="@+id/logoutfragment"
             android:title="Logout"/>
 
     </group>

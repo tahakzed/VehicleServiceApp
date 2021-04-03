@@ -7,7 +7,7 @@
     android:background="@color/mid_blue"
     tools:context=".SplashScreen">
     <androidx.cardview.widget.CardView
-        android:id="@+id/splash_card"
+        android:id="@+id/loading_card"
         android:layout_width="120dp"
         android:layout_height="120dp"
         android:layout_gravity="center"
@@ -20,12 +20,12 @@
             android:background="@color/mid_blue"
             android:alpha="0.5"
             />
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        app:srcCompat="@drawable/car_wash_logo" />
+        <ImageView
+            android:id="@+id/loading_imageView3"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            app:srcCompat="@drawable/car_wash_logo" />
     </androidx.cardview.widget.CardView>
 
 </FrameLayout>

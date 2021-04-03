@@ -101,6 +101,8 @@ public class AdminViewModel extends AndroidViewModel {
                                     (Long)doc.get("Payment Charges"),
                                     (Long)doc.get("Payment Tip"),
                                     (Boolean) doc.get("isSeenByClient"),
+                                    (Boolean) doc.get("isSeenByAdmin"),
+                                    (Boolean) doc.get("isSeenInProgressByClient"),
                                     doc.get("Client Image Id").toString(),
                                     doc.get("Admin Image Id").toString()));
                         }

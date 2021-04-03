@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
-            android:id="@+id/service_profile_pic"
+            android:id="@+id/booking_service_profile_pic"
             android:layout_width="match_parent"
             android:src="@drawable/blue_color_design"
             android:scaleType="centerCrop"
@@ -89,6 +89,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layoutAnimation="@anim/layout_animation"
 
                 />
         </LinearLayout>

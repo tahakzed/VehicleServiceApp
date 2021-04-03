@@ -1,6 +1,7 @@
 package com.example.vehicleserviceapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +25,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -53,6 +58,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
     private TextInputEditText nameET,emailET,phoneET,passET,vnameET,serviceStnET,chargesCarET,chargesBikeET;
     private Button signUpBtn,signInBtn,continueBtn1,continueBtn2;
     private static final int MAPS_ACTIVITY_REQUEST_CODE=101;
+    private TextInputLayout tl,pl;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -80,12 +86,21 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
         serviceStnET=view.findViewById(R.id.service_station_input);
         chargesCarET=view.findViewById(R.id.car_charges_input);
         chargesBikeET=view.findViewById(R.id.bike_charges_input);
+        tl=view.findViewById(R.id.email_layout);
+        pl=view.findViewById(R.id.pass_layout);
         db= FirebaseFirestore.getInstance();
         auth=FirebaseAuth.getInstance();
 
+
         return view;
     }
+    public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
+            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
+    public static boolean validate(String emailStr) {
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
+        return matcher.find();
+    }
 
     @Override
     public void onClick(View v) {
@@ -101,12 +116,23 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
                 break;
             case R.id.or_sign_up_btn:
                 ViewGroup buserlayout=view.findViewById(R.id.basic_user_layout);
-                buserlayout.setVisibility(LinearLayout.GONE);
                 userTypeStr=userType.getText().toString();
                 fullName=nameET.getText().toString();
                 email=emailET.getText().toString();
                 phone=phoneET.getText().toString();
                 password=passET.getText().toString();
+                if(!validate(email))
+                {
+                    tl.setError("Invalid Email!");
+                    return;
+                }
+                if(password.length()<6)
+                {
+                    pl.setError("Password must contain at least 6 characters!");
+                    return;
+                }
+                buserlayout.setVisibility(LinearLayout.GONE);
+
                 if(userTypeStr.equals("Client")) {
                     ViewGroup clientLayout=view.findViewById(R.id.client_layout);
                     clientLayout.setVisibility(LinearLayout.VISIBLE);
@@ -142,15 +168,13 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
         if(requestCode==MAPS_ACTIVITY_REQUEST_CODE && resultCode==RESULT_OK){
             lat=data.getDoubleExtra("Lat",-1);
             lng=data.getDoubleExtra("Lng",-1);
-            Map<String,Object> dbData=new HashMap<>();
+            HashMap<String,Object> dbData=new HashMap<>();
             dbData.put("User Type",userTypeStr);
             dbData.put("Lat",lat);
             dbData.put("Lng",lng);
 
             if(userTypeStr.equals("Admin")){
                 List<String> admin_reviews=new ArrayList<>();
-                admin_reviews.add(" ;NaN; ");
-
                 Admin admin=new Admin(fullName,email,phone,lat,lng,serviceStation,admin_reviews,chargesCar,chargesBike,new ArrayList<String>(),"");
                 dbData.put("Name",admin.getName());
                 dbData.put("Email",admin.getEmail());
@@ -166,74 +190,34 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
                             //START: Checking if user exist
                             if(documentSnapshot.exists()){
                                 Toast.makeText(getContext(),"User Already Exist!",Toast.LENGTH_SHORT).show();
+                                Intent intent = getActivity().getIntent();
+                                getActivity().getSupportFragmentManager().beginTransaction().remove(SignUpFragment.this).commit();
+                                getActivity().finish();
+                                startActivity(intent);
                             }//END: Checking if user exist
                             //START: User does not exist
                             else{
                                 //START: add to firestore
-                                db.document("Users/"+admin.getEmail()).set(dbData).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toast.makeText(getContext(),"record added!",Toast.LENGTH_SHORT).show();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(getContext(),"Failed!",Toast.LENGTH_SHORT).show();
-                                    }
-                                });//END: add to firestore
+                                db.document("Users/"+admin.getEmail()).set(dbData);
                                 dbData.put("Service Station",admin.getServiceStationName());
                                 dbData.put("Charges Car",chargesCar);
                                 dbData.put("Charges Bike",chargesBike);
                                 dbData.put("Bookings",new ArrayList<String>());
-                                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<String> task) {
-                                        if(task.isSuccessful())
-                                        dbData.put("FCMToken",task.getResult());
-                                    }
-                                });
-                                db.document("Admin/"+admin.getEmail()).set(dbData).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toast.makeText(getContext(),"record added!",Toast.LENGTH_SHORT).show();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(getContext(),"Failed!",Toast.LENGTH_SHORT).show();
-                                    }
-                                });//END: add to firestore
-                                //START: add user to firebase auth
-                                auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-                                        if(task.isSuccessful()){
-                                            Toast.makeText(getContext(),"User Created",Toast.LENGTH_SHORT).show();
-                                        }
-                                        else{
-                                            Toast.makeText(getContext(),"Error",Toast.LENGTH_SHORT).show();
+                                Intent loadingIntent=new Intent(getContext(),LoadingActivity.class);
+                                loadingIntent.putExtra("dbData",dbData);
+                                loadingIntent.putExtra("Email",email);
+                                loadingIntent.putExtra("Password",password);
+                                loadingIntent.putExtra("UserType",userTypeStr);
+                                loadingIntent.putExtra("Mode","sign-up");
+                                startActivity(loadingIntent);
+                                getActivity().getSupportFragmentManager().beginTransaction().remove(SignUpFragment.this).commit();
+                                getActivity().finish();
 
-                                        }
-                                    }
-                                });
-                                //END: add user to firebase auth
                             } //END: User does not exist
                         }
                     }
                 });
-                Fragment mainFragment=new MainFragment();
-                Bundle bundle=new Bundle();
-                bundle.putString("Name",admin.getName());
-                bundle.putString("Email",admin.getEmail());
-                bundle.putString("Phone",admin.getPhone());
-                bundle.putString("User Type",userTypeStr);
-                bundle.putString("Location",lat+";"+lng);
 
-                mainFragment.setArguments(bundle);
-                getActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment,mainFragment)
-                        .commit();
             }
             else if(userTypeStr.equals("Client")){
                 List<String> vehicleNameAndType=new ArrayList<>();
@@ -257,54 +241,19 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
                             //START: User does not exist
                             else{
                                 //START: add to firestore
-                                db.document("Users/"+client.getEmail()).set(dbData).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toast.makeText(getContext(),"record added!",Toast.LENGTH_SHORT).show();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(getContext(),"Failed!",Toast.LENGTH_SHORT).show();
-                                    }
-                                });//END: add to firestore
-                                //START: add to firestore
+                                db.document("Users/"+client.getEmail()).set(dbData);
+                                dbData.put("Vehicles",client.getVehicleNameAndType());
+                                dbData.put("Bookings",client.getBookings());
 
-                                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<String> task) {
-                                        dbData.put("Vehicles",client.getVehicleNameAndType());
-                                        dbData.put("Bookings",client.getBookings());
-                                        if(task.isSuccessful())
-                                            dbData.put("FCMToken",task.getResult());
-
-
-                                db.document("Client/"+client.getEmail()).set(dbData).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toast.makeText(getContext(),"record added!",Toast.LENGTH_SHORT).show();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(getContext(),"Failed!",Toast.LENGTH_SHORT).show();
-                                    }
-                                });//END: add to firestore
-                                    }
-                                });
-                                //START: add user to firebase auth
-                                auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-                                        if(task.isSuccessful()){
-                                            Toast.makeText(getContext(),"User Created",Toast.LENGTH_SHORT).show();
-                                        }
-                                        else{
-                                            Toast.makeText(getContext(),"Error",Toast.LENGTH_SHORT).show();
-
-                                        }
-                                    }
-                                });
+                                Intent loadingIntent=new Intent(getContext(),LoadingActivity.class);
+                                loadingIntent.putExtra("dbData",dbData);
+                                loadingIntent.putExtra("Email",email);
+                                loadingIntent.putExtra("Password",password);
+                                loadingIntent.putExtra("UserType",userTypeStr);
+                                loadingIntent.putExtra("Mode","sign-up");
+                                startActivity(loadingIntent);
+                                getActivity().getSupportFragmentManager().beginTransaction().remove(SignUpFragment.this).commit();
+                                getActivity().finish();
                                 //END: add user to firebase auth
                             } //END: User does not exist
                         }
@@ -312,5 +261,30 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
                 });
             }
         }
+    }
+    private void checkUserTypeAndLaunchUser(){
+
+        if(userTypeStr.equals("Client"))
+        {
+            Intent intent=new Intent(getContext(), ClientMainActivity.class);
+            intent.putExtra("Email",email);
+            startActivity(intent);
+            getActivity().getSupportFragmentManager().beginTransaction().remove(SignUpFragment.this).commit();
+            getActivity().finish();
+        }
+        else if(userTypeStr.equals("Admin")){
+            Intent intent=new Intent(getContext(), AdminMainActivity.class);
+            intent.putExtra("Email",email);
+            startActivity(intent);
+            getActivity().getSupportFragmentManager().beginTransaction().remove(SignUpFragment.this).commit();
+            getActivity().finish();
+        }
+
+    }
+    private void saveSharedPreferences(String email,String password){
+        SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+        SharedPreferences.Editor editor=sharedPreferences.edit();
+        editor.putString("Email",email);
+        editor.putString("Password",password);
     }
 }

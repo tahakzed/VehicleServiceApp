@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sign_up_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SignUpFragment"
-    android:background="@drawable/blue_color_design"
-    android:backgroundTint="@color/mid_blue"
-    android:backgroundTintMode="multiply"
-    android:orientation="vertical">
-
+    android:orientation="vertical"
+    android:background="@color/black">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/car_wash_bg"
+        android:scaleType="centerCrop"
+        android:alpha="0.6"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/gradient00"
+        />
     <LinearLayout
         android:layout_gravity="top"
         android:layout_width="match_parent"
@@ -58,6 +67,7 @@
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="5dp"
         android:hint="Full Name"
+
         android:textColorHint="@color/white"
         app:startIconTint="@color/white"
         app:startIconDrawable="@drawable/name_icon"
@@ -68,16 +78,18 @@
             android:id="@+id/fname_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             />
     </com.google.android.material.textfield.TextInputLayout>
 
 
     <com.google.android.material.textfield.TextInputLayout
-
+        android:id="@+id/email_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp"
+        app:errorEnabled="true"
         android:layout_marginBottom="5dp"
         android:hint="Email"
         android:textColorHint="@color/white"
@@ -88,6 +100,7 @@
             android:id="@+id/email_signup_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             />
     </com.google.android.material.textfield.TextInputLayout>
     <com.google.android.material.textfield.TextInputLayout
@@ -107,6 +120,7 @@
             android:inputType="number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -126,15 +140,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
+                android:textColor="@color/white"
                 />
         </com.google.android.material.textfield.TextInputLayout>
     <com.google.android.material.textfield.TextInputLayout
-
+        android:id="@+id/pass_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="5dp"
+        app:errorEnabled="true"
         android:hint="Password"
         android:textColorHint="@color/white"
         app:startIconTint="@color/white"
@@ -148,6 +164,7 @@
             android:inputType="textPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -161,7 +178,7 @@
             android:layout_height="wrap_content"
             android:text="Sign-Up"
             android:layout_gravity="end"
-            android:textColor="@color/white"
+
             style="@style/Widget.MaterialComponents.Button.TextButton"
             />
         <Button
@@ -200,6 +217,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
+                android:textColor="@color/white"
                 />
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
@@ -218,6 +236,7 @@
                 android:id="@+id/vname_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/white"
                 />
         </com.google.android.material.textfield.TextInputLayout>
         <Button
@@ -255,6 +274,7 @@
                 android:id="@+id/service_station_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/white"
                 />
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
@@ -274,6 +294,7 @@
                 android:id="@+id/car_charges_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/white"
                 />
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
@@ -293,6 +314,7 @@
                 android:id="@+id/bike_charges_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/white"
                 />
         </com.google.android.material.textfield.TextInputLayout>
         <Button
@@ -308,4 +330,4 @@
             />
     </LinearLayout>
 
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

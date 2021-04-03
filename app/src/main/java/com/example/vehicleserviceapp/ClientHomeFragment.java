@@ -1,6 +1,7 @@
 package com.example.vehicleserviceapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,10 +42,11 @@ public class ClientHomeFragment extends Fragment implements OnNoteListener{
         View view =inflater.inflate(R.layout.fragment_client_home, container, false);
         myViewModel= new ViewModelProvider(getActivity()).get(MyViewModel.class);
         recyclerView=view.findViewById(R.id.service_station_list);
-        clientEmail="tahakzed@gmail.com";
         adapter=new MyAdapter(adminList,getContext(),this);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
+        clientEmail=getClientEmailFromSharedPreferences();
+
         return view;
     }
 
@@ -60,6 +63,10 @@ public class ClientHomeFragment extends Fragment implements OnNoteListener{
         });
     }
 
+    private String getClientEmailFromSharedPreferences(){
+        SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getContext());
+        return sharedPreferences.getString("Email","");
+    }
     @Override
     public void onNoteClick(int position,View view) {
 
@@ -72,6 +79,7 @@ public class ClientHomeFragment extends Fragment implements OnNoteListener{
         double lng=current.getLng();
         long chargesCar=current.getChargesCar();
         long chargesBike=current.getChargesBike();
+        String imageId=current.getImageId();
         List<String> adminBookings=current.getBookings();
         Bundle bundle=new Bundle();
         bundle.putString("client email",clientEmail);
@@ -83,6 +91,8 @@ public class ClientHomeFragment extends Fragment implements OnNoteListener{
         bundle.putDouble("lng",lng);
         bundle.putLong("chargesCar",chargesCar);
         bundle.putLong("chargesBike",chargesBike);
+        if(!imageId.equals(""))
+            bundle.putString("imageId",imageId);
         bundle.putStringArrayList("adminBookings",(ArrayList<String>) adminBookings);
         bundle.putStringArrayList("reviews",(ArrayList<String>) current.getReviews());
         ClientHomeFragmentDirections.ActionClientHomeFragmentToBookingFragment action=

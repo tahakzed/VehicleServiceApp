@@ -16,6 +16,7 @@
             android:layout_marginBottom="5dp"
             android:orientation="vertical">
             <ImageView
+                android:id="@+id/client_recycler_view_service_img"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:scaleType="centerCrop"

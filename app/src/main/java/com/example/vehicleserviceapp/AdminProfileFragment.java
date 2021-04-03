@@ -113,11 +113,12 @@ public class AdminProfileFragment extends Fragment implements View.OnClickListen
         addressTv.setText(address);
         chargesTv.setText("Car: "+chargesCar+", Bike: "+chargesBike);
         //load image from firebase
+        if(!imageId.equals("")){
         StorageReference storageReference= FirebaseStorage.getInstance().getReference();
         StorageReference ref=storageReference.child("images/"+imageId);
         GlideApp.with(this)
                 .load(ref)
-                .into(profilePhoto);
+                .into(profilePhoto);}
         //load image from firebase
 
     }
